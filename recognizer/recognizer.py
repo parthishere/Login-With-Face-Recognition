@@ -185,7 +185,8 @@ def recognizer(details, username, unique_id):
 # ----------------------------------------------------------------------- #
 
 def Recognizer(details, username, unique_id):
-    
+    threshold = 0
+    threshold_for_unknown = 0
     def destroy_recognizer(self):
             self.video.release()
             cv2.destroyAllWindows()
@@ -282,6 +283,9 @@ def Recognizer(details, username, unique_id):
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
                     proceed_login = False
+                    threshold_for_unknown += 10
+                    if threshold_for_unknown >= 100:
+                        raise StopIteration
             else:
                 for (top,right,bottom,left), name in zip(face_locations, face_names):
                     top*=2
@@ -298,7 +302,9 @@ def Recognizer(details, username, unique_id):
                     if str(username+unique_id) in name:
                         proceed_login = True
                         print('will break')
-                        raise StopIteration
+                        threshold += 2
+                        if threshold >= 10:
+                            raise StopIteration
                     else:
                         proceed_login = False
             
