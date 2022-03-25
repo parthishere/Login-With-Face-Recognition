@@ -13,6 +13,7 @@ from .views import (
     # login_with_face_part2, # login with recognizer Class
     # login_with_face_part3, # login with part 3 which consists of all the nessecity things inside on function!
     # test_frame
+    export_users_xls
 )
 
 app_name = 'recognizer'

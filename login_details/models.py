@@ -4,6 +4,7 @@ from recognizer.models import UserProfile, TeacherProfileModel, LectrueModel
 from django.contrib.auth.models import User
 import recognizer
 
+
 # Create your models here.
 class LoginDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

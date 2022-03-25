@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'recognizer',
     'login_details',
     'teacher',
+    'import_export',
     
     'django_cleanup.apps.CleanupConfig',
 ]

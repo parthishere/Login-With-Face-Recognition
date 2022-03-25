@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404, reverse, get_list_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -18,6 +19,38 @@ from django.contrib.auth import (
     get_user_model,
     logout
 )
+
+import xlwt
+
+def export_users_xls(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="attendance.xls"'.format(str(datetime.date()))
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Users')
+
+    # Sheet header, first row
+    row_num = 0
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = ['User', 'Authenticated user', 'Teacher', 'Lecture', 'Login date', 'Login time']
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+
+    # Sheet body, remaining rows
+    font_style = xlwt.XFStyle()
+
+    rows = LoginDetails.objects.all().values_list('user', 'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time')
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            ws.write(row_num, col_num, row[col_num], font_style)
+
+    wb.save(response)
+    return response
 
 
 
