@@ -17,7 +17,7 @@ def user_image_path(instance, filename):
     name = ( instance.user.username + instance.unique_id )
     filename = name + extension 
     
-    path = 'User_images/{}/'.format(instance.gender)
+    path = 'User_images/'
     return os.path.join(path , filename)
 
 def teacher_image_path(instance, filename):
@@ -92,7 +92,14 @@ class UserProfile(models.Model):
     def __str__(self):
         name = self.user.username + str(self.pk)
         return "{} {}".format(self.user.username, self.pk)
- 
+    
+    def save(self, *args, **kwargs):
+        try:
+            this = UserProfile.objects.get(id=self.id)
+            if this.image != self.image:
+                this.image.delete(save=False)
+        except: pass
+        super(UserProfile, self).save(*args, **kwargs)
     
     
 def user_post_save_receiver(sender, instance, *args, **kwargs):
@@ -170,3 +177,18 @@ class LectrueModel(models.Model):
     def __str__(self):
         return self.lecture_name
     
+class ChangeWebsiteCount(models.Model):
+    recognize = models.BooleanField(default=True)
+    class Meta():
+        ordering = ['-id']
+        
+    def __str__(self):
+        return str(self.pk)
+    
+def pre_save_change_website_reciever(sender, instance, *args, **kwargs):
+    if ChangeWebsiteCount.objects.all().count() % 2:
+        instance.recognize = True
+    else:
+        instance.recognize=False
+
+pre_save.connect(pre_save_change_website_reciever, sender=ChangeWebsiteCount)

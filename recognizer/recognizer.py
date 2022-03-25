@@ -213,7 +213,7 @@ def Recognizer(details, username, unique_id):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     # os.chdir("..")
     base_dir = os.getcwd()
-    image_dir = os.path.join(base_dir,"{}\{}\{}".format('media','User_images',details['gender']))
+    image_dir = os.path.join(base_dir,"{}\{}".format('media','User_images'))
     # print(image_dir)
     names = []
     proceed_login = False
@@ -221,7 +221,7 @@ def Recognizer(details, username, unique_id):
 
     for root,dirs,files in os.walk(image_dir):
         for file in files:
-            if file.endswith('jpg') or file.endswith('png'):
+            if file.endswith('jpeg') or file.endswith('png') or file.endswith('jpg'):
                 path = os.path.join(root, file)
                 img = face_recognition.load_image_file(path)
                 label = file[:len(file)-4]
