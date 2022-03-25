@@ -13,6 +13,7 @@ from .views import (
     # login_with_face_part2, # login with recognizer Class
     # login_with_face_part3, # login with part 3 which consists of all the nessecity things inside on function!
     # test_frame
+    change_whole_site_by_clicking,
 )
 
 app_name = 'recognizer'
@@ -26,6 +27,7 @@ urlpatterns = [
     path('profile/<int:pk>', profile_view, name='profile'),
     path('profile/<int:pk>/update', update_profile_view, name='update-profile'),
     path('login-with-face', login_with_face, name='login-with-face'),
+    path('change-website', change_whole_site_by_clicking, name='change-website'),
     # path('login-with-face-2', login_with_face_part2, name='login-with-face-2'),
     # path('frame-check', test_frame, name='test-frame')
     

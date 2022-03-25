@@ -6,7 +6,7 @@ from django.views.decorators import gzip
 
 import cv2
 
-from .models import TeacherProfileModel, UserProfile, User
+from .models import TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
 from .recognizer import recognizer, Recognizer, frame_check
 
@@ -21,24 +21,52 @@ from django.contrib.auth import (
 
 
 
+def change_whole_site_by_clicking(request):
+
+    context = {}
+    if request.method == 'POST':
+        if request.user.is_superuser or request.user in request.user.teacher_profile.all():
+            if ChangeWebsiteCount.objects.all().count() % 2 == 0:
+                c = ChangeWebsiteCount.objects.create()
+                change_site_count = ChangeWebsiteCount.objects.all().count()
+                context['recognize'] = c.recognize
+            else:
+                c = ChangeWebsiteCount.objects.create()
+                change_site_count = ChangeWebsiteCount.objects.all().count()
+                context['recognize'] = c.recognize
+
+            print(change_site_count)
+            return redirect('recognizer:home')
+        else:
+            return redirect('recongizer:home')
+    return render(request, 'recognizer/home.html', context=context)
+    
+
 
 # Create your views here.
 def home_view(request):
     context = {}
+
     context['data'] = 'Add your cool photo to your profile !'
     login_details_form = LectureDetailsForm(request.POST or None)
     context['login_details_form'] = login_details_form
+    c  = ChangeWebsiteCount.objects.order_by('id').last()
+    context['recognize'] = c.recognize
+    context['change_site_count'] = ChangeWebsiteCount.objects.all().count()
     teacher=False
+    teacher_user = None
     try:
         user = request.user
         try:
-            user = TeacherProfileModel.objects.get(user=user)
+            teacher_user = TeacherProfileModel.objects.get(user=user)
             teacher = True
+            user = UserProfile.objects.get(user=user)
         except:
             user = UserProfile.objects.get(user=user)
         
         context['user'] = user
         context['teacher'] = teacher
+        context['teacher_user'] = teacher_user
         context['premium_data'] = LoginDetails.objects.filter(user=request.user)
     except:
         return redirect('recognizer:login')
@@ -65,7 +93,7 @@ def home_view(request):
         print(names, known_lables, login_proceed)
         print(request.user.username + user.unique_id)
 
-        if str(request.user.username + user.unique_id) in names:
+        if login_proceed:
             context['login_detail'] = True
             user.login_proceed = login_proceed
             instance = LoginDetails.objects.create(user=request.user, lecture=login_details_form.cleaned_data.get('lecture'), teacher=login_details_form.cleaned_data.get('teacher'))
@@ -156,7 +184,7 @@ def signup_view(request):
                 context['form'] = signup_form
                 messages.success(request, "Sign up Sucsessful")
                 
-                user_profile = user.user_profile
+                user_profile = user.user_profile.all().first()
                 # uqid = get_uqid(request=request)
                 # request.session['uqid'] = uqid
                 return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))

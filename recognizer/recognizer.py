@@ -37,7 +37,7 @@ def recognizer(details, username, unique_id):
 	
     base_dir = os.getcwd() # ek pachal
 
-    image_dir = os.path.join(base_dir,"{}\{}\{}".format('media','User_images',details['gender']))
+    image_dir = os.path.join(base_dir,"{}\{}".format('media','User_images'))
     
         
 
@@ -185,6 +185,8 @@ def recognizer(details, username, unique_id):
 # ----------------------------------------------------------------------- #
 
 def Recognizer(details, username, unique_id):
+    global destroy_count 
+    destroy_count = 0
     
     def destroy_recognizer(self):
             self.video.release()
@@ -212,7 +214,7 @@ def Recognizer(details, username, unique_id):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     # os.chdir("..")
     base_dir = os.getcwd()
-    image_dir = os.path.join(base_dir,"{}\{}\{}".format('media','User_images',details['gender']))
+    image_dir = os.path.join(base_dir,"{}\{}".format('media','User_images'))
     # print(image_dir)
     names = []
     proceed_login = False
@@ -220,7 +222,7 @@ def Recognizer(details, username, unique_id):
 
     for root,dirs,files in os.walk(image_dir):
         for file in files:
-            if file.endswith('jpg') or file.endswith('png'):
+            if file.endswith('jpeg') or file.endswith('png') or file.endswith('jpg'):
                 path = os.path.join(root, file)
                 img = face_recognition.load_image_file(path)
                 label = file[:len(file)-4]
@@ -249,12 +251,12 @@ def Recognizer(details, username, unique_id):
 
             for face_encoding in face_encodings:
 
-                matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+                matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.65)
 
                 face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)	
                 
                 try:
-                    matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+                    matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.65)
 
                     face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
                     best_match_index = np.argmin(face_distances)
@@ -282,6 +284,9 @@ def Recognizer(details, username, unique_id):
                     font = cv2.FONT_HERSHEY_DUPLEX
                     cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
                     proceed_login = False
+                    destroy_count += 1
+                    if destroy_count >= 100:
+                        raise StopIteration
             else:
                 for (top,right,bottom,left), name in zip(face_locations, face_names):
                     top*=2
@@ -297,7 +302,6 @@ def Recognizer(details, username, unique_id):
                     print(username+unique_id)
                     if str(username+unique_id) in name:
                         proceed_login = True
-                        print('will break')
                         raise StopIteration
                     else:
                         proceed_login = False

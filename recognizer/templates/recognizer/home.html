@@ -2,23 +2,18 @@
 
 {% block body_block %}
 <style>
-#container {
-	margin: 0px auto;
-	width: 500px;
-	height: 375px;
-	border: 10px #333 solid;
-}
-#videoElement {
-	width: 500px;
-	height: 375px;
-	background-color: #666;
-}
-
-{% comment %} .myCanvas{
-       background-image: url("{{ url 'recognizer:login-with-face' }}"); 
-} {% endcomment %}
-
-</style>
+  #container {
+    margin: 0px auto;
+    width: 500px;
+    height: 375px;
+    border: 10px #333 solid;
+  }
+  #videoElement {
+    width: 500px;
+    height: 375px;
+    background-color: #666;
+  }
+  </style>  
 
 <spacer type="vertical" width="1000" height="1000">  </spacer>
 <div class='container-fluid'>
@@ -37,11 +32,22 @@
 
 <div >
 <p>
+  {{ user.image }}
 {{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}</a>
 <p>
 </div>
 <hr>
 
+
+{% comment %} <div id="container">
+	<video autoplay="true" id="videoElement">
+	
+	</video>
+</div> {% endcomment %}
+{{ recognize }}
+{{ change_site_count }}
+
+{% if recognize %}
 <div class='container-sm'>
 {% if teacher %}
 {% else %}
@@ -54,7 +60,24 @@
 {% else %}{% endif %}
 {% endif %}
 </div>
+{% else %}{% endif %}
 
+<div class='container-fluid'>
+{% if request.user.is_superuser or request.user in request.user.teacher_profile.all %}
+<hr>
+</br>
+<form method='POST' action="{% url 'recognizer:change-website' %}">
+  {% csrf_token %}
+  {% if change_site_count|divisibleby:2 %}
+  <input class='form-control btn btn-danger' type='submit' value='Disable Taking Attendance' name='submit'>
+  {% else %}
+  <input class='form-control btn btn-danger' type='submit' value='Enable Taking Attendance' name='submit'>
+  {% endif %}
+</form>
+<hr>
+</br>
+{% else %}{% endif %}
+</div>
 
 {% if premium_data %}
 <p>Previous Logins</p>
@@ -72,6 +95,20 @@
 {% else %}{% endif %}
 
 </div>
+
+{% comment %} <script>
+  var video = document.querySelector("#videoElement");
+
+  if (navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(function (stream) {
+        video.srcObject = stream;
+      })
+      .catch(function (err0r) {
+        console.log("Something went wrong!");
+      });
+  }
+</script> {% endcomment %}
 
 
 {% endblock %}
