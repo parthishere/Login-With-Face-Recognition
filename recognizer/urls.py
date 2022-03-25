@@ -29,6 +29,7 @@ urlpatterns = [
     path('profile/<int:pk>/update', update_profile_view, name='update-profile'),
     path('login-with-face', login_with_face, name='login-with-face'),
     path('change-website', change_whole_site_by_clicking, name='change-website'),
+    path('export-attendance', export_users_xls, name='export'),
     # path('login-with-face-2', login_with_face_part2, name='login-with-face-2'),
     # path('frame-check', test_frame, name='test-frame')
     

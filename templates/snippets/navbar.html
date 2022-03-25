@@ -38,7 +38,7 @@
           {% for obj in request.user.user_profile.all %}
           <a class="dropdown-item" href="{% if request.user.is_authenticated %}{% url 'recognizer:profile' pk=obj.pk %}{% else %}#{% endif %}">See Profile</a>
           {% endfor %}
-
+{{ request.user.teacher_profile.all }}
           {% if request.user.teacher_profile %}
           <a class="dropdown-item" href="{% if request.user %}{% url 'teacher:dashboard' %}{% else %}{% endif %}">Dashboard</a>
           {% else %} {% endif %}

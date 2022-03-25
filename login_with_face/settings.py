@@ -29,7 +29,7 @@ SECRET_KEY = '3p__4+!#)2p30xb&+p2awyyw3rw1cl__akyns-$5sdomb!d+#j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['loginwface.herokuapp.com', '127.0.0.1', '192.168.0.102', '192.168.0.100',]
+ALLOWED_HOSTS = ['loginwface.herokuapp.com', '127.0.0.1', '192.168.0.102', '192.168.0.100', '100.96.185.16', '192.168.60.146']
 
 
 # Application definition

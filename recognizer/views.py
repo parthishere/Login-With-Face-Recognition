@@ -24,7 +24,7 @@ import xlwt
 
 def export_users_xls(request):
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="attendance.xls"'.format(str(datetime.date()))
+    response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
 
     wb = xlwt.Workbook(encoding='utf-8')
     ws = wb.add_sheet('Users')
