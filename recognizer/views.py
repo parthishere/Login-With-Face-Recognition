@@ -7,7 +7,7 @@ from django.views.decorators import gzip
 
 import cv2
 
-from .models import TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
+from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
 from .recognizer import recognizer, Recognizer, frame_check
 
@@ -58,15 +58,17 @@ def change_whole_site_by_clicking(request):
     context = {}
     if request.method == 'POST':
         if request.user.is_superuser or request.user in request.user.teacher_profile.all():
-            if ChangeWebsiteCount.objects.all().count() % 2 == 0:
-                c = ChangeWebsiteCount.objects.create()
-                change_site_count = ChangeWebsiteCount.objects.all().count()
+            teacher = request.user.teacher_profile.all().last()
+            print(teacher)
+            if ChangeWebsiteCount.objects.filter(teacher=teacher).count() % 2 == 0:
+                c = ChangeWebsiteCount.objects.create(teacher=teacher)
+                change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
                 context['recognize'] = c.recognize
             else:
-                c = ChangeWebsiteCount.objects.create()
-                change_site_count = ChangeWebsiteCount.objects.all().count()
+                c = ChangeWebsiteCount.objects.create(teacher=teacher)
+                change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
                 context['recognize'] = c.recognize
-
+ 
             print(change_site_count)
             return redirect('recognizer:home')
         else:
@@ -78,13 +80,19 @@ def change_whole_site_by_clicking(request):
 # Create your views here.
 def home_view(request):
     context = {}
-
+    context['change_site_count'] = 0
+    context['recognize'] = False
+    try:
+        teacher = request.user.teacher_profile.all().last()
+        change_site_count = teacher.change_website_objects.all().count()
+        context['change_site_count'] = change_site_count
+    except:
+        pass
+    
     context['data'] = 'Add your cool photo to your profile !'
     login_details_form = LectureDetailsForm(request.POST or None)
     context['login_details_form'] = login_details_form
-    c  = ChangeWebsiteCount.objects.order_by('id').last()
-    context['recognize'] = c.recognize
-    context['change_site_count'] = ChangeWebsiteCount.objects.all().count()
+
     teacher=False
     teacher_user = None
     try:
@@ -104,51 +112,72 @@ def home_view(request):
         return redirect('recognizer:login')
     
     # this is new 
+    
     if request.method == 'POST' and login_details_form.is_valid():
-
-        try:
-            user = UserProfile.objects.get(user=request.user)
-             
-            gender = user.gender
-            details = {
-            'gender':gender,
-            'username':user.user.username,
-            'unique_id':user.unique_id,
-            'user':user,
-            }
-            print(details)
-        except:
-            details = None
         
-        names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
-        
-        print(names, known_lables, login_proceed)
-        print(request.user.username + user.unique_id)
+        teacher = login_details_form.cleaned_data.get('teacher')
+        o = teacher.change_website_objects.all().count()
+        c  = ChangeWebsiteCount.objects.filter(teacher=teacher).order_by('id').last()
+        context['recognize'] = c.recognize
 
-        if login_proceed:
-            context['login_detail'] = True
-            user.login_proceed = login_proceed
-            instance = LoginDetails.objects.create(user=request.user, lecture=login_details_form.cleaned_data.get('lecture'), teacher=login_details_form.cleaned_data.get('teacher'))
-            # instance.user=request.user
-            instance.save()
-            user.save()
+        
+        if o%2==0:
+
+            try:
+                user = UserProfile.objects.get(user=request.user)
+                
+                gender = user.gender
+                details = {
+                'gender':gender,
+                'username':user.user.username,
+                'unique_id':user.unique_id,
+                'user':user,
+                }
+                print(details)
+            except:
+                details = None
             
-            context['login_details_form'] = login_details_form
+            names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
             
-            messages.success(request, 'now you canwatch premium content')
-            return redirect('recognizer:home')
+            print(names, known_lables, login_proceed)
+            print(request.user.username + user.unique_id)
+
+            if login_proceed:
+                context['login_detail'] = True
+                user.login_proceed = login_proceed
+                instance = LoginDetails.objects.create(user=request.user, lecture=login_details_form.cleaned_data.get('lecture'), teacher=login_details_form.cleaned_data.get('teacher'))
+                # instance.user=request.user
+                instance.save()
+                user.save()
+                
+                context['login_details_form'] = login_details_form
+                
+                messages.success(request, 'now you canwatch premium content')
+                return redirect('recognizer:home')
+            else:
+                context['login_detail'] = False
+                user.login_proceed = login_proceed
+                user.save()
+                
+                context['login_details_form'] = login_details_form
+                
+                messages.error(request, 'get out of my website..')
+                return redirect('recognizer:home')
         else:
-            context['login_detail'] = False
-            user.login_proceed = login_proceed
-            user.save()
-            
-            context['login_details_form'] = login_details_form
-            
-            messages.error(request, 'get out of my website..')
-            return redirect('recognizer:home')
+            messages.error(request,"Can't take attendance")
     
     
     return render(request, 'recognizer/home.html', context=context)
+
+#AJAX
+
+def load_lectures(request):
+    print(request)
+    teacher_id = request.GET.get('teacher')
+    print(teacher_id)
+    lectures = LectrueModel.objects.filter(teacher_id=teacher_id).all()
+    return render(request, 'recognizer/lecture_dropdown_list_option.html', {'lectures': lectures})
+
 
 
 
@@ -409,3 +438,5 @@ register = template.Library()
 @register.simple_tag
 def current_pk(user):
     return UserProfile.objects.get(user=user).pk   
+
+

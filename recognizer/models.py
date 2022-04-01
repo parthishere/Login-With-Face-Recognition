@@ -70,7 +70,7 @@ class UserProfile(models.Model):
         ('IT', 'INFORMATION AND TECHNOLOGY'),
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile', unique=True)
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
     about = models.CharField(max_length=30, null=True, blank=True)
@@ -161,6 +161,25 @@ class TeacherProfileModel(models.Model):
         name = self.user.username + str(self.pk)
         return "{} {}".format(self.user.username, self.pk)
     
+def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
+    try:
+        obj = TeacherProfileModel.objects.get(user=instance)
+        print("in first try")
+    except:
+        obj = None
+        print('in first except')
+        
+    print(instance)
+    print(instance.id)
+    print(instance.is_staff)
+    print(instance.is_superuser)
+
+    if instance.is_superuser and obj is None:
+        obj = TeacherProfileModel.objects.create(user=instance)
+
+
+post_save.connect(user_post_save_receiver_for_teacher, sender=User)
+    
 
 
 class LectrueModel(models.Model):
@@ -171,7 +190,7 @@ class LectrueModel(models.Model):
     )
     
     lecture_name = models.CharField(default="", max_length=100)
-    associeted_teacher = models.ManyToManyField(TeacherProfileModel, blank=True)
+    teacher = models.ForeignKey(TeacherProfileModel, blank=True, null=True, related_name='lectures', on_delete=models.CASCADE)
     branch = models.CharField(choices=BRANCH_CHOICES, null=True, blank=True, max_length=5)
        
     def __str__(self):
@@ -179,6 +198,8 @@ class LectrueModel(models.Model):
     
 class ChangeWebsiteCount(models.Model):
     recognize = models.BooleanField(default=True)
+    teacher = models.ForeignKey(TeacherProfileModel, on_delete=models.CASCADE, null=True, blank=True, related_name='change_website_objects')
+    
     class Meta():
         ordering = ['-id']
         
@@ -186,7 +207,7 @@ class ChangeWebsiteCount(models.Model):
         return str(self.pk)
     
 def pre_save_change_website_reciever(sender, instance, *args, **kwargs):
-    if ChangeWebsiteCount.objects.all().count() % 2:
+    if ChangeWebsiteCount.objects.filter(teacher=instance.teacher).count() % 2:
         instance.recognize = True
     else:
         instance.recognize=False

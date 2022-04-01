@@ -14,13 +14,15 @@ from .views import (
     # login_with_face_part3, # login with part 3 which consists of all the nessecity things inside on function!
     # test_frame
     export_users_xls,
-    change_whole_site_by_clicking
+    change_whole_site_by_clicking,
+    load_lectures,
 )
 
 app_name = 'recognizer'
 
 urlpatterns = [
     path('', home_view, name='home'),
+    path('ajax/lec/', load_lectures, name='data_lec_url'),
     path('login/', login_view, name='login'),
     path('signup/', signup_view, name='signup'),
     path('logout/', logout_view, name='logout'),
@@ -30,7 +32,7 @@ urlpatterns = [
     path('login-with-face', login_with_face, name='login-with-face'),
     path('change-website', change_whole_site_by_clicking, name='change-website'),
     path('export-attendance', export_users_xls, name='export'),
-    # path('login-with-face-2', login_with_face_part2, name='login-with-face-2'),
-    # path('frame-check', test_frame, name='test-frame')
+    
+    
     
 ]

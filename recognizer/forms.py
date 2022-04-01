@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 from login_details.models import LoginDetails
 
-from .models import User, UserProfile
+from .models import LectrueModel, User, UserProfile
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField()
@@ -38,6 +38,20 @@ class LectureDetailsForm(forms.ModelForm):
         model = LoginDetails
         fields = ['teacher', 'lecture']
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['lecture'].queryset = LectrueModel.objects.none()
+        print(self.data)
+        
+        if 'teacher' in self.data:
+            print("in try block")
+            try:
+                teacher_id = int(self.data.get('teacher'))
+                self.fields['lecture'].queryset = LectrueModel.objects.filter(teacher_id=teacher_id).order_by('-id')
+            except (ValueError, TypeError):
+                pass  # invalid input from the client; ignore and fallback to empty City queryset
+        elif self.instance.pk:
+            self.fields['lecture'].queryset = self.instance.teacher.lectures.order_by('-id')
     # def __init__(self, *args, **kwargs):
     #     super(LectureDetailsForm, self).__init__(*args, **kwargs)
     #     for visible in self.visible_fields():
