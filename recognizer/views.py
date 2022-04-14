@@ -9,7 +9,7 @@ import cv2
 
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
-from .recognizer import recognizer, Recognizer, frame_check
+from .recognizer import RecognizerClass, recognizer, Recognizer, frame_check
 
 from login_details.models import LoginDetails
 
@@ -437,6 +437,19 @@ register = template.Library()
 
 @register.simple_tag
 def current_pk(user):
-    return UserProfile.objects.get(user=user).pk   
+    return UserProfile.objects.get(user=user).pk  
+
+
+
+def gen(camera):
+    while True:
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+		
+def facecam_feed(request):
+    
+	return StreamingHttpResponse(gen(RecognizerClass()),
+					content_type='multipart/x-mixed-replace; boundary=frame') 
 
 
