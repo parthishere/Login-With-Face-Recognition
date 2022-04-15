@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 
 from .views import (
+    facecam_feed,
     home_view,
     login_view,
     signup_view,
@@ -16,6 +17,7 @@ from .views import (
     export_users_xls,
     change_whole_site_by_clicking,
     load_lectures,
+    just_a_function,
 )
 
 app_name = 'recognizer'
@@ -33,6 +35,7 @@ urlpatterns = [
     path('change-website', change_whole_site_by_clicking, name='change-website'),
     path('export-attendance', export_users_xls, name='export'),
     
-    
+    path('facecam-feed', facecam_feed, name='feed_stream'),
+    path('redirect-face', just_a_function, name='redirect_stream'),
     
 ]

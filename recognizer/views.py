@@ -9,7 +9,7 @@ import cv2
 
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
-from .recognizer import RecognizerClass, recognizer, Recognizer, frame_check
+from .recognizer import RecognizerClass, recognizer, Recognizer 
 
 from login_details.models import LoginDetails
 
@@ -404,26 +404,6 @@ def login_with_face(request):
     print(context)
     return render(request, 'recognizer/home.html', context)
         
-# from streamer import Streamer
-
-
-
-# def gen():
-#     streamer = Streamer('localhost', 8080)
-#     streamer.start()
-
-#     while True:
-#         if streamer.streaming:
-#             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + streamer.get_jpeg() + b'\r\n\r\n')
-
-# @app.route('/')
-# def index():
-#   return render_template('index.html')
-
-# @app.route('/video_feed')
-# def video_feed():
-#   return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
         
  
         
@@ -443,13 +423,29 @@ def current_pk(user):
 
 def gen(camera):
     while True:
-        frame = camera.get_frame()
+        names, known_face_names, proceed_login, frame = camera.get_frame()
+        
+        print(names, known_face_names, proceed_login)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-		
+	
+def just_a_function(request):
+    return render(request, 'recognizer/feed-stream.html', {})
+	
 def facecam_feed(request):
+    user = UserProfile.objects.get(user=request.user)
+                
+    gender = user.gender
+    details = {
+    'gender':gender,
+    'username':user.user.username,
+    'unique_id':user.unique_id,
+    'user':user,
+    }
+    print(details)
+
     
-	return StreamingHttpResponse(gen(RecognizerClass()),
-					content_type='multipart/x-mixed-replace; boundary=frame') 
+    return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id)),
+                    content_type='multipart/x-mixed-replace; boundary=frame') 
 
 
