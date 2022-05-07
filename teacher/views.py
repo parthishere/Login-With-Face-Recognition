@@ -17,5 +17,5 @@ def profile_view(request):
     except:
         return redirect('recognizer:logout-cnf')
     
-    return render(request, 'teacher/dashboard.html', context=context)
+    return render(request, 'teacher/index.html', context=context)
 

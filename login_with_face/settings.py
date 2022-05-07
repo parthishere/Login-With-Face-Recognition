@@ -29,7 +29,7 @@ SECRET_KEY = '3p__4+!#)2p30xb&+p2awyyw3rw1cl__akyns-$5sdomb!d+#j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['facelogup.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['facelogup.herokuapp.com', '127.0.0.1', '192.168.0.101']
 
 
 # Application definition

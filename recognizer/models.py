@@ -17,7 +17,7 @@ def user_image_path(instance, filename):
     name = ( instance.user.username + instance.unique_id )
     filename = name + extension 
     
-    path = 'User_images/'
+    path = f"User_images/{instance.college}/{instance.branch}/{instance.gender}"
     return os.path.join(path , filename)
 
 def teacher_image_path(instance, filename):
@@ -74,10 +74,10 @@ class UserProfile(models.Model):
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
     about = models.CharField(max_length=30, null=True, blank=True)
-    gender = models.CharField(choices=GENDER_CHOICES, max_length=2, blank=True, null=True)
-    college = models.CharField(choices=COLLEGE_CHOICES, max_length=5, blank=True, null=True)
+    gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
+    college = models.CharField(choices=COLLEGE_CHOICES, max_length=5)
     company = models.CharField(max_length=100,null=True, blank=True)
-    branch = models.CharField(choices=BRANCH_CHOICES,max_length=3, blank=True, null=True)
+    branch = models.CharField(choices=BRANCH_CHOICES,max_length=3)
     enrollment_number = models.IntegerField(default='190280111140')
     birth_date = models.DateField(null=True, blank=True)
     phone_number = models.IntegerField(default='1234567890')

@@ -10,9 +10,9 @@ def base64_encode(data):
     if data:
         return 'data:image/png;base64,' + data
     
-def get_face_detect_data(file, username, unique_id, superuser):
+def get_face_detect_data(file, details):
     img = cv2.imdecode(np.fromstring(file, np.uint8), cv2.IMREAD_UNCHANGED)
-    image_data, proceed_login, names, known_face_names = detectImage(img, username, unique_id, superuser)
+    image_data, proceed_login, names, known_face_names = detectImage(img, details)
 
     return image_data, proceed_login, names, known_face_names
 
@@ -21,7 +21,7 @@ import os
 import face_recognition
 
 
-def detectImage(frame, username, unique_id, superuser):
+def detectImage(frame, details):
     
     print("start")
     
@@ -30,7 +30,7 @@ def detectImage(frame, username, unique_id, superuser):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.getcwd()
-    image_dir = os.path.join(base_dir,"{}\{}".format('media','User_images'))
+    image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','User_images', details['college'], details['branch'], details['gender']))
 
     names = []
     proceed_login = False
@@ -70,16 +70,12 @@ def detectImage(frame, username, unique_id, superuser):
                 face_names.append(name)
                 if name not in names:
                     names.append(name)
-                    print("name array:"+names)
+                    # print("name array:"+names)
         except:
             pass
 
     if len(face_names) == 0:
         for (top,right,bottom,left) in face_locations:
-            # top*=2
-            # right*=2
-            # bottom*=2
-            # left*=2
 
             cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
             
@@ -88,16 +84,13 @@ def detectImage(frame, username, unique_id, superuser):
             proceed_login = False
     else:
         for (top,right,bottom,left), name in zip(face_locations, face_names):
-            # top*=2
-            # right*=2
-            # bottom*=2
-            # left*=2
+
 
             cv2.rectangle(frame, (left,top),(right,bottom), (0,255,0), 2)
 
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
-            if str(username+unique_id) in name or superuser:
+            if str(details['username']+details['unique_id']) in name or details['superuser']:
                 proceed_login = True
             else:
                 proceed_login = False

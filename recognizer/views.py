@@ -220,15 +220,18 @@ def home_view(request):
                 gender = user.gender
                 details = {
                 'gender':gender,
+                'college':user.college,
+                'branch':user.branch,
                 'username':user.user.username,
                 'unique_id':user.unique_id,
                 'user':user,
+                'superuser':request.user.is_superuser
                 }
                 print(details)
             except:
                 details = None
             
-            frame, login_proceed, names, known_face_names = get_face_detect_data(file, username=user.user.username, unique_id=user.unique_id, superuser=False)
+            frame, login_proceed, names, known_face_names = get_face_detect_data(file, details)
             ret, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
             
