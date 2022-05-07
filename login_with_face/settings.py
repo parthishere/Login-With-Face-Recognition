@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['loginwface.herokuapp.com', '127.0.0.1', '192.168.0.102', '192.
 # Application definition
 
 INSTALLED_APPS = [
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # 'channels',
     'recognizer',
     'login_details',
     'teacher',
@@ -49,6 +51,8 @@ INSTALLED_APPS = [
     
     'django_cleanup.apps.CleanupConfig',
 ]
+
+# ASGI_APPLICATION = "login_with_face.asgi.application"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -154,3 +158,5 @@ LOGOUT_REDIRECT_URL = '/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+

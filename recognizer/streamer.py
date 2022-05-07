@@ -1,89 +1,107 @@
+import base64
 import cv2
-import numpy
-import socket
-import struct
-import threading
-from io import BytesIO
+import numpy as np
+
+def base64_decode(data):
+    out=base64.decodestring(data.split(',')[1].encode())
+    return out
+     
+def base64_encode(data):
+    if data:
+        return 'data:image/png;base64,' + data
+    
+def get_face_detect_data(file, username, unique_id, superuser):
+    img = cv2.imdecode(np.fromstring(file, np.uint8), cv2.IMREAD_UNCHANGED)
+    image_data, proceed_login, names, known_face_names = detectImage(img, username, unique_id, superuser)
+
+    return image_data, proceed_login, names, known_face_names
 
 
-class Streamer(threading.Thread):
+import os
+import face_recognition
 
-    def __init__(self, hostname, port):
-        threading.Thread.__init__(self)
 
-        self.hostname = hostname
-        self.port = port
-        self.running = False
-        self.streaming = False
-        self.jpeg = None
+def detectImage(frame, username, unique_id, superuser):
+    
+    print("start")
+    
+    known_face_encodings = []
+    known_face_names = []
 
-    def run(self):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.getcwd()
+    image_dir = os.path.join(base_dir,"{}\{}".format('media','User_images'))
 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print('Socket created')
+    names = []
+    proceed_login = False
 
-        s.bind((self.hostname, self.port))
-        print('Socket bind complete')
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+    for root,dirs,files in os.walk(image_dir):
+        for file in files:
+            if file.endswith('jpeg') or file.endswith('png') or file.endswith('jpg'):
+                path = os.path.join(root, file) 
+                img = face_recognition.load_image_file(path)
+                label = file[:len(file)-4]
+                img_encoding = face_recognition.face_encodings(img)[0]
+                known_face_names.append(label)
+                known_face_encodings.append(img_encoding)
 
-        payload_size = struct.calcsize("L")
+    face_locations = []
+    face_encodings = []
 
-        s.listen(10)
-        print('Socket now listening')
+    print(known_face_names)
 
-        self.running = True
+    face_locations = face_recognition.face_locations(frame)
+    face_encodings = face_recognition.face_encodings(frame, face_locations)
+    face_names = []
+    
+    
+    for face_encoding in face_encodings:
 
-        while self.running:
+        try:
+            matches = face_recognition.compare_faces(known_face_encodings, np.array(face_encoding), tolerance = 0.6)
 
-            print('Start listening for connections...')
+            face_distances = face_recognition.face_distance(known_face_encodings,face_encoding)
+            best_match_index = np.argmin(face_distances)
+            
+            if matches[best_match_index]:
+                name = known_face_names[best_match_index]
+                face_names.append(name)
+                if name not in names:
+                    names.append(name)
+                    print("name array:"+names)
+        except:
+            pass
 
-            conn, addr = s.accept()
-            print("New connection accepted.")
+    if len(face_names) == 0:
+        for (top,right,bottom,left) in face_locations:
+            # top*=2
+            # right*=2
+            # bottom*=2
+            # left*=2
 
-            while True:
+            cv2.rectangle(frame, (left,top),(right,bottom), (0,0,255), 2)
+            
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
+            proceed_login = False
+    else:
+        for (top,right,bottom,left), name in zip(face_locations, face_names):
+            # top*=2
+            # right*=2
+            # bottom*=2
+            # left*=2
 
-                data = conn.recv(payload_size)
+            cv2.rectangle(frame, (left,top),(right,bottom), (0,255,0), 2)
 
-                if data:
-                    # Read frame size
-                    msg_size = struct.unpack("L", data)[0]
-
-                    # Read the payload (the actual frame)
-                    data = b''
-                    while len(data) < msg_size:
-                        missing_data = conn.recv(msg_size - len(data))
-                        if missing_data:
-                            data += missing_data
-                        else:
-                            # Connection interrupted
-                            self.streaming = False
-                            break
-
-                    # Skip building frame since streaming ended
-                    if self.jpeg is not None and not self.streaming:
-                        continue
-
-                    # Convert the byte array to a 'jpeg' format
-                    memfile = BytesIO()
-                    memfile.write(data)
-                    memfile.seek(0)
-                    frame = numpy.load(memfile)
-
-                    ret, jpeg = cv2.imencode('.jpg', frame)
-                    self.jpeg = jpeg
-
-                    self.streaming = True
-                else:
-                    conn.close()
-                    print('Closing connection...')
-                    self.streaming = False
-                    self.running = False
-                    self.jpeg = None
-                    break
-
-        print('Exit thread.')
-
-    def stop(self):
-        self.running = False
-
-    def get_jpeg(self):
-        return self.jpeg.tobytes()
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
+            if str(username+unique_id) in name or superuser:
+                proceed_login = True
+            else:
+                proceed_login = False
+    
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    
+    return frame, proceed_login, names, known_face_names

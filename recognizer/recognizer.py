@@ -184,11 +184,10 @@ def recognizer(details, username, unique_id):
 # ----------------------------------------------------------------------- #
 # ----------------------------------------------------------------------- #
 
-def Recognizer(details, username, unique_id):
+def Recognizer(img, details, username, unique_id):
     threshold = 0
     threshold_for_unknown = 0
     def destroy_recognizer(self):
-            self.video.release()
             cv2.destroyAllWindows()
     
     # javascript no video ahiya lavvano
@@ -205,16 +204,13 @@ def Recognizer(details, username, unique_id):
     known_face_encodings = []
     known_face_names = []
 
-    # base_dir = os.path.dirname(os.path.abspath(__file__))
-    # image_dir = os.path.join(base_dir, "static")
-    # image_dir = os.path.join(image_dir, "profile_pics")
 
-    # base_dir = os.getcwd()
+    cv2.imshow("image",img)
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    # os.chdir("..")
     base_dir = os.getcwd()
     image_dir = os.path.join(base_dir,"{}\{}".format('media','User_images'))
-    # print(image_dir)
+
     names = []
     proceed_login = False
 
@@ -322,7 +318,9 @@ def Recognizer(details, username, unique_id):
     # print(jpeg.tobytes())
     return (names, known_face_names, proceed_login) #jpeg.tobytes())
 
-
+from imutils.video import VideoStream
+from imutils.video import FPS
+import imutils
 
 class RecognizerClass(object):
     
@@ -373,91 +371,102 @@ class RecognizerClass(object):
         
         self.video = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 
+        self.vs = VideoStream(src=0).start()
+        self.fps = FPS().start()
+        
     def __del__(self):
         self.video.release()
         cv2.destroyAllWindows()
-        self.check_login_proceed()
+        # self.check_login_proceed()
         
 
     def get_frame(self):
         
-        ret, self.frame = self.video.read()
         try:
-            small_frame = cv2.resize(self.frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
-        except:
-            pass
-
-        rgb_small_frame = small_frame[:,:,::-1]
-
-        self.face_locations = face_recognition.face_locations(rgb_small_frame)
-        self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
-        self.face_names = []
-
-
-        for face_encoding in self.face_encodings:
-
-            matches = face_recognition.compare_faces(self.known_face_encodings, np.array(face_encoding), tolerance = 0.6)
-
-            face_distances = face_recognition.face_distance(self.known_face_encodings,face_encoding)	
-            
+            self.frame = self.vs.read()
+            frame = cv2.flip(frame,1)
+            # ret, self.frame = self.video.read()
             try:
-                matches = face_recognition.compare_faces(self.known_face_encodings, np.array(face_encoding), tolerance = 0.6)
-
-                face_distances = face_recognition.face_distance(self.known_face_encodings,face_encoding)
-                best_match_index = np.argmin(face_distances)
-
-                if matches[best_match_index]:
-                    name = self.known_face_names[best_match_index]
-                    self.face_names.append(name)
-                    if name not in self.names:
-                        self.names.append(name)
+                small_frame = cv2.resize(self.frame, (0,0), fx=0.5, fy= 0.5, interpolation=cv2.INTER_AREA)
             except:
                 pass
 
-        if len(self.face_names) == 0:
-            for (top,right,bottom,left) in self.face_locations:
-                top*=2
-                right*=2
-                bottom*=2
-                left*=2
+            rgb_small_frame = small_frame[:,:,::-1]
 
-                cv2.rectangle(self.frame, (left,top),(right,bottom), (0,0,255), 2)
+            self.face_locations = face_recognition.face_locations(rgb_small_frame)
+            self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
+            self.face_names = []
 
-                # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(self.frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
-                self.proceed_login = False
-                self.threshold_for_unknown += 10
-                if self.threshold_for_unknown >= 100:
-                    raise StopIteration
-        else:
-            for (top,right,bottom,left), name in zip(self.face_locations, self.face_names):
-                top*=2
-                right*=2
-                bottom*=2
-                left*=2
 
-                cv2.rectangle(self.frame, (left,top),(right,bottom), (0,255,0), 2)
+            for face_encoding in self.face_encodings:
 
-                # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
-                font = cv2.FONT_HERSHEY_DUPLEX
-                cv2.putText(self.frame, name, (left, top), font, 0.8, (255,255,255),1)
-                if (self.username+self.unique_id) in name:
-                    self.proceed_login = True
-                    print('will break')
-                    self.threshold += 2
-                    if self.threshold >= 10:
-                        raise StopIteration
-                else:
+                matches = face_recognition.compare_faces(self.known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+
+                face_distances = face_recognition.face_distance(self.known_face_encodings,face_encoding)	
+                
+                try:
+                    matches = face_recognition.compare_faces(self.known_face_encodings, np.array(face_encoding), tolerance = 0.6)
+
+                    face_distances = face_recognition.face_distance(self.known_face_encodings,face_encoding)
+                    best_match_index = np.argmin(face_distances)
+
+                    if matches[best_match_index]:
+                        name = self.known_face_names[best_match_index]
+                        self.face_names.append(name)
+                        if name not in self.names:
+                            self.names.append(name)
+                except:
+                    pass
+
+            if len(self.face_names) == 0:
+                for (top,right,bottom,left) in self.face_locations:
+                    top*=2
+                    right*=2
+                    bottom*=2
+                    left*=2
+
+                    cv2.rectangle(self.frame, (left,top),(right,bottom), (0,0,255), 2)
+
+                    # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
+                    font = cv2.FONT_HERSHEY_DUPLEX
+                    cv2.putText(self.frame, 'Unknown', (left, top), font, 0.8, (255,255,255),1)
                     self.proceed_login = False
-                    
-        
-        # cv2.imshow('frame', self.frame)
-        ret, jpeg = cv2.imencode('.jpg', self.frame)
-        
-        # if cv2.waitKey(0) & 0xFF == ord('q'):
+                    self.threshold_for_unknown += 1
+                    print('will break')
+                    if self.threshold_for_unknown >= 10:
+                        raise StopIteration
+            else:
+                for (top,right,bottom,left), name in zip(self.face_locations, self.face_names):
+                    top*=2
+                    right*=2
+                    bottom*=2
+                    left*=2
+
+                    cv2.rectangle(self.frame, (left,top),(right,bottom), (0,255,0), 2)
+
+                    # cv2.rectangle(frame, (left, bottom - 30), (right,bottom - 30), (0,255,0), -1)
+                    font = cv2.FONT_HERSHEY_DUPLEX
+                    cv2.putText(self.frame, name, (left, top), font, 0.8, (255,255,255),1)
+                    if (self.username+self.unique_id) in name:
+                        self.proceed_login = True
+                        print('will break')
+                        self.threshold += 1
+                        if self.threshold >= 5:
+                            raise StopIteration
+                    else:
+                        self.proceed_login = False
+                        
             
+            # cv2.imshow('frame', self.frame)
+            ret, jpeg = cv2.imencode('.jpg', self.frame)
+            self.fps.update()
+            # if cv2.waitKey(0) & 0xFF == ord('q'):
+                
+                
             
-        
-        return (self.names, self.known_face_names, self.proceed_login, jpeg.tobytes())
+            return (self.names, self.known_face_names, self.proceed_login, jpeg.tobytes(), False)
+        except:
+            self.video.release()
+            cv2.destroyAllWindows()
+            return None, None, None, None, True
 

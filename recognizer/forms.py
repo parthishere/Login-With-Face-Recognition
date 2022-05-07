@@ -40,6 +40,10 @@ class LectureDetailsForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['teacher'].widget.attrs.update({'class':'form-control'})
+        self.fields['lecture'].widget.attrs.update({'class':'form-control'})
+        
         self.fields['lecture'].queryset = LectrueModel.objects.none()
         print(self.data)
         

@@ -18,6 +18,8 @@ from .views import (
     change_whole_site_by_clicking,
     load_lectures,
     just_a_function,
+    another_home_view,
+    succsess,
 )
 
 app_name = 'recognizer'
@@ -34,8 +36,8 @@ urlpatterns = [
     path('login-with-face', login_with_face, name='login-with-face'),
     path('change-website', change_whole_site_by_clicking, name='change-website'),
     path('export-attendance', export_users_xls, name='export'),
-    
-    path('facecam-feed', facecam_feed, name='feed_stream'),
-    path('redirect-face', just_a_function, name='redirect_stream'),
+    path("succsess/", succsess, name="sus"),
+    # path('facecam-feed', facecam_feed, name='feed_stream'),
+    # path('redirect-face', just_a_function, name='redirect_stream'),
     
 ]

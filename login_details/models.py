@@ -2,8 +2,17 @@ from django.db import models
 
 from recognizer.models import UserProfile, TeacherProfileModel, LectrueModel
 from django.contrib.auth.models import User
-import recognizer
+import recognizer, datetime, os
 
+def processed_image_path(instance, filename):
+    
+    extension = "." + filename.split('.')[-1]
+    t = datetime.datetime.now()
+    name = ( instance.user.username + t.strftime("%d") + t.strftime("%m") + t.strftime("%Y") + t.strftime("%H:%M:%S"))
+    filename = name + extension 
+    
+    path = 'Recognized_img/'
+    return os.path.join(path , filename)
 
 # Create your models here.
 class LoginDetails(models.Model):
@@ -14,6 +23,7 @@ class LoginDetails(models.Model):
     teacher = models.ForeignKey("recognizer.TeacherProfileModel", on_delete=models.CASCADE, null=True, blank=True, related_name='login_details_with_teacher')
     lecture = models.ForeignKey(LectrueModel, on_delete=models.CASCADE, null=True, blank=True)
     enrollment_number = models.IntegerField(default=0)
+    processed_img = models.ImageField(upload_to=processed_image_path, null=True, blank=True)
     
     def __str__(self):
         login_date = str(self.login_date)

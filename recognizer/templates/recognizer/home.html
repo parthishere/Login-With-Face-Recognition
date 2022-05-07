@@ -1,24 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
+
+{% block css_block %}
+<link rel='stylesheet' href="{% static 'css/main.css' %}">
+{% endblock %}
+
 
 {% block body_block %}
-<style>
-#container {
-	margin: 0px auto;
-	width: 500px;
-	height: 375px;
-	border: 10px #333 solid;
-}
-#videoElement {
-	width: 500px;
-	height: 375px;
-	background-color: #666;
-}
 
-{% comment %} .myCanvas{
-       background-image: url("{{ url 'recognizer:login-with-face' }}"); 
-} {% endcomment %}
-
-</style>
 
 <spacer type="vertical" width="1000" height="1000">  </spacer>
 <div class='container-fluid'>
@@ -42,20 +32,35 @@
 </div>
 <hr>
 
-<a href="{% url 'recognizer:redirect_stream' %}">go here</a>
+{% comment %} <a href="{% url 'recognizer:redirect_stream' %}">go here</a> {% endcomment %}
 
 <div class='container-sm'>
 {% if teacher %}
 {% else %}
 {% if user.image %}<!-- recognizer/ajax/lec/ -->
-  <form id='LectureDetailsForm' method='POST' data-attendance-url="{% url 'recognizer:data_lec_url' %}" action="{% url 'recognizer:home' %}"novalidate>
-    {% comment %} action="{% url 'recognizer:home' %}" {% endcomment %}
-    <table>
-  {{ login_details_form.as_table  }}
-    </table>
-  {% csrf_token %}
-  <input class='form-control btn btn-outline-dark' type='submit' value='Recognize My Face' name='submit'>
-  </form>
+<div class="contentarea">
+  <div class="Input">
+      <form id="myAwesomeForm" method="POST" name="inputForm" enctype='multipart/form-data' data-attendance-url="{% url 'recognizer:data_lec_url' %}" action="{% url 'recognizer:home' %}">
+          {% csrf_token %}
+          <div id="camera" class="camera">
+            <video id="video">Video stream not available.</video>
+            <button id="startbutton" type="button">Take photo</button>
+            <input type="image" id="filename" name="filename" />
+            <canvas id="canvas">
+              </canvas>
+          </div>
+          <br>
+          <div>
+              <img id="photo" alt="your image">
+              {{ login_details_form.as_p }}
+          </div>
+          <br>
+          <button id='submit' type="submit" class="btn btn-secondary" id="submit">Submit</button>
+      </form>
+  </div>
+ <img src="{{ path }}" alt="The screen capture will appear in this box.">
+</div>
+
 {% else %}{% endif %}
 {% endif %}
 </div>
@@ -84,7 +89,7 @@
 
 <ul class="list-group">
   <li class="list-group-item">Logged in on {{ data.login_date }}  |  {{ data.login_time }}</li>
-  
+
 {% endfor %}
 </ul>
 {% endif %}
@@ -95,25 +100,8 @@
 
 </div>
 
+
 <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-<script>
-  $("#id_teacher").change(function () {
-    var url = $("#LectureDetailsForm").attr("data-attendance-url");  // get the url of the `load_cities` view
-    var teacherID = $(this).val();  // get the selected country ID from the HTML input
-    
-    $.ajax({                       
-      url: url,                    
-
-
-      data: {
-        'teacher': teacherID       
-      },
-      success: function (data) {   // `data` is the return of the `load_cities` view function
-        $("#id_lecture").html(data);  // replace the contents of the city input with the data that came from the server
-      }
-    });
-
-  });
-</script>
+<script src="{% static 'js/main.js' %}"></script>
 
 {% endblock %}
