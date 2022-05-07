@@ -39,3 +39,4 @@ django-import-export==2.7.1
 imutils
 xlwt==1.3.0
 urllib3==1.26.4
+python-dev-tools
