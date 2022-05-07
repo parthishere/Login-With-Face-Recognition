@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
-from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm
+from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
 from .recognizer import RecognizerClass, Recognizer 
 from django.http import JsonResponse
 
@@ -26,6 +26,10 @@ from django.contrib.auth import (
 
 import xlwt
 
+from django.contrib.auth.decorators import user_passes_test
+
+
+@user_passes_test(lambda u: u.is_superuser)
 def export_users_xls(request):
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
@@ -109,30 +113,12 @@ def export_users_xls(request):
             else:      
                 ws.write(row_num, col_num, row[col_num], body_style)
                 
-        
-        
-    # for row in rows:
-    #     row_num += 1
-    #     for col_num in range(len(row)):
-    #         if col_num == 4:
-    #             #date
-    #             style = xlwt.XFStyle()
-    #             style.num_format_str = format1
-    #             ws.write(row_num, col_num, row[col_num], style)
-
-    #         elif col_num == 5:
-    #             #time
-    #             style = xlwt.XFStyle()
-    #             style.num_format_str = format2
-    #             ws.write(row_num, col_num, row[col_num], style)
-
-    #         else:      
-    #             ws.write(row_num, col_num, row[col_num], header_style)
 
     wb.save(response)
     return response
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def change_whole_site_by_clicking(request):
     
     context = {}
@@ -157,35 +143,16 @@ def change_whole_site_by_clicking(request):
 
 from .streamer import get_face_detect_data
 
-def another_home_view(request):
-    context = {}
-    # login_details_form = LectureDetailsForm(request.POST or None)
-    # context['login_details_form'] = login_details_form
-    context['user'] = request.user
-    if request.POST:
-
-   
-
-        image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAA…pqA7RSrmBjBRqPRU0/w+FrR/ktkf4YQAAAABJRU5ErkJggg=="
- 
-        try:
-            image_data = get_face_detect_data(image)
-            if image_data:
-                return JsonResponse(status=200, data={'image': image_data, 'message': 'Face detected'})
-        except Exception as e:
-            pass
-        return JsonResponse(status=400, data={'errors': {'error_message': 'No face detected'}})
-    return render(request, 'recognizer/another-home.html', context=context)
 
 
 # Create your views here.
 
-allowedIps = ['129.0.0.1', '127.0.0.1']
+ALLOWED_IPS = ['192.168.{}.{}'.format(i,j) for i in range(256) for j in range(256)]
 
 def allow_by_ip(view_func):
     def authorize(request, *args, **kwargs):
         user_ip = request.META['REMOTE_ADDR']
-        for ip in allowedIps:
+        for ip in ALLOWED_IPS:
             if ip==user_ip:
                 return view_func(request, *args, **kwargs)
         return HttpResponse('Invalid Ip Access!')
@@ -194,7 +161,7 @@ def allow_by_ip(view_func):
 # @allow_by_ip
 @login_required(login_url='recognizer:login')
 def home_view(request):
-    
+    print(request.META['REMOTE_ADDR'])
     context = {}
     context['change_site_count'] = 0
     context['recognize'] = False
@@ -350,6 +317,8 @@ def login_view(request):
     return render(request, 'recognizer/login.html', context=context)
 
 
+
+@user_passes_test(lambda u: u.is_superuser)
 def signup_view(request):
     signup_form = AuthenticationForm(request.POST or None)
     context = {
@@ -396,7 +365,8 @@ def profile_view(request, pk=None):
         pass
     
     try:
-        login_instance = LoginDetails.objects.filter(user=request.user)
+        if request.user == instance.user:
+            login_instance = LoginDetails.objects.filter(user=request.user)
     except: 
         pass
     
@@ -407,7 +377,7 @@ def profile_view(request, pk=None):
 
     context['login_object'] = login_instance
     try:
-        if User.objects.get(pk=pk).teacher_profile.all():
+        if User.objects.get(pk=pk).teacher_profile.all().first():
             context['teacher'] = True
 
         else:
@@ -415,6 +385,7 @@ def profile_view(request, pk=None):
     except:
         pass
     return render(request, 'recognizer/profile.html', context=context)
+
 
 
 @login_required(login_url='recognizer:login')
@@ -430,9 +401,7 @@ def update_profile_view(request, pk=None):
     if instance.user == request.user or request.user.is_superuser:
         if request.POST:
             if edit_form.is_valid:
-                img = request.FILES.get('image')
                 user = edit_form.save()
-                instance.image = img
                 instance.save()
                 
                 messages.success(request, "Profile Edited Sucsessfuly")
@@ -448,6 +417,42 @@ def update_profile_view(request, pk=None):
                 messages.error(request, "Somthing is wrong , i can feel it")
 
     return render(request, 'recognizer/profile_form.html', context=context)
+
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def update_profile_image_view(request, pk=None):
+    try: 
+        instance = UserProfile.objects.get(pk=pk)
+    except:
+        instance = None
+    edit_form = UserProfileImageForm(request.POST or None, instance=instance)
+    context = {
+            'form':edit_form,
+        }
+    if instance.user == request.user or request.user.is_superuser:
+        if request.POST:
+            if edit_form.is_valid:
+                img = request.FILES.get('image')
+                user = edit_form.save()
+                instance.image = img
+                instance.save()
+                
+                messages.success(request, "Profile Image Edited Sucsessfuly")
+                request.session['uqid'] = user.unique_id
+                context = {
+                    'form':edit_form,
+                }
+                return HttpResponseRedirect(reverse("recognizer:profile", kwargs={'pk': pk}))
+            else:
+                context = {
+                    'form':edit_form,
+                }
+                messages.error(request, "Somthing is wrong , i can feel it")
+
+    return render(request, 'recognizer/profile_form.html', context=context)
+
+
 
 
 
@@ -578,93 +583,3 @@ def facecam_feed(request):
     return StreamingHttpResponse(gen(RecognizerClass(details, username=user.user.username, unique_id=user.unique_id)),
                     content_type='multipart/x-mixed-replace; boundary=frame') 
 
-
-
-
-
-# context = {}
-# context['change_site_count'] = 0
-# context['recognize'] = False
-# try:
-#     teacher = request.user.teacher_profile.all().last()
-#     change_site_count = teacher.change_website_objects.all().count()
-#     context['change_site_count'] = change_site_count
-# except:
-#     pass
-
-# context['data'] = 'Add your cool photo to your profile !'
-# login_details_form = LectureDetailsForm(request.POST or None)
-# context['login_details_form'] = login_details_form
-
-# teacher=False
-# teacher_user = None
-# try:
-#     user = request.user
-#     try:
-#         teacher_user = TeacherProfileModel.objects.get(user=user)
-#         teacher = True
-#         user = UserProfile.objects.get(user=user)
-#     except:
-#         user = UserProfile.objects.get(user=user)
-    
-#     context['user'] = user
-#     context['teacher'] = teacher
-#     context['teacher_user'] = teacher_user
-#     context['premium_data'] = LoginDetails.objects.filter(user=request.user)
-# except:
-#     return redirect('recognizer:login')
-
-# # this is new 
-
-# if request.method == 'POST' and login_details_form.is_valid():
-    
-#     teacher = login_details_form.cleaned_data.get('teacher')
-#     o = teacher.change_website_objects.all().count()
-#     c  = ChangeWebsiteCount.objects.filter(teacher=teacher).order_by('id').last()
-#     context['recognize'] = c.recognize
-
-    
-#     if o%2==0:
-
-#         try:
-#             user = UserProfile.objects.get(user=request.user)
-            
-#             gender = user.gender
-#             details = {
-#             'gender':gender,
-#             'username':user.user.username,
-#             'unique_id':user.unique_id,
-#             'user':user,
-#             }
-#             print(details)
-#         except:
-#             details = None
-        
-#         names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
-        
-#         print(names, known_lables, login_proceed)
-#         print(request.user.username + user.unique_id)
-
-#         if login_proceed:
-#             context['login_detail'] = True
-#             user.login_proceed = login_proceed
-#             instance = LoginDetails.objects.create(user=request.user, lecture=login_details_form.cleaned_data.get('lecture'), teacher=login_details_form.cleaned_data.get('teacher'))
-#             # instance.user=request.user
-#             instance.save()
-#             user.save()
-            
-#             context['login_details_form'] = login_details_form
-            
-#             messages.success(request, 'now you canwatch premium content')
-#             return redirect('recognizer:home')
-#         else:
-#             context['login_detail'] = False
-#             user.login_proceed = login_proceed
-#             user.save()
-            
-#             context['login_details_form'] = login_details_form
-            
-#             messages.error(request, 'get out of my website..')
-#             return redirect('recognizer:home')
-#     else:
-#         messages.error(request,"Can't take attendance")

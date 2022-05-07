@@ -18,7 +18,7 @@ from .views import (
     change_whole_site_by_clicking,
     load_lectures,
     just_a_function,
-    another_home_view,
+    update_profile_image_view,
     succsess,
 )
 
@@ -27,12 +27,13 @@ app_name = 'recognizer'
 urlpatterns = [
     path('', home_view, name='home'),
     path('ajax/lec/', load_lectures, name='data_lec_url'),
-    path('login/', login_view, name='login'),
-    path('signup/', signup_view, name='signup'),
-    path('logout/', logout_view, name='logout'),
+    path('accounts/login/', login_view, name='login'),
+    path('accounts/signup/', signup_view, name='signup'),
+    path('accounts/logout/', logout_view, name='logout'),
     path('logout-confirm/', logout_confirm_view, name='logout-cnf'),
     path('profile/<int:pk>', profile_view, name='profile'),
     path('profile/<int:pk>/update', update_profile_view, name='update-profile'),
+    path('profile/image/<int:pk>/update', update_profile_image_view, name='update-img-profile'),
     path('login-with-face', login_with_face, name='login-with-face'),
     path('change-website', change_whole_site_by_clicking, name='change-website'),
     path('export-attendance', export_users_xls, name='export'),

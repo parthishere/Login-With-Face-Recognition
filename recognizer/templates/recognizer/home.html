@@ -24,7 +24,6 @@
 
 
 {% endif %}
-{{ user.user }}
 <div >
 <p>
 {{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}</a>
@@ -38,27 +37,39 @@
 {% if teacher %}
 {% else %}
 {% if user.image %}<!-- recognizer/ajax/lec/ -->
-<div class="contentarea">
-  <div class="Input">
+<div class="container-fluid">
+  <div class="table-responsive-md">
       <form id="myAwesomeForm" method="POST" name="inputForm" enctype='multipart/form-data' data-attendance-url="{% url 'recognizer:data_lec_url' %}" action="{% url 'recognizer:home' %}">
           {% csrf_token %}
           <div id="camera" class="camera">
+            <table class="table">
+              <tr>
+                <th scope="col">
             <video id="video">Video stream not available.</video>
             <button id="startbutton" type="button">Take photo</button>
-            <input type="image" id="filename" name="filename" />
+            {% comment %} <input type="image" id="filename" name="filename" /> {% endcomment %}
+          </th>
+          <th scope="col">
             <canvas id="canvas">
               </canvas>
           </div>
           <br>
           <div>
-              <img id="photo" alt="your image">
-              {{ login_details_form.as_p }}
+            <th scope="col">
+              <img id="photo" alt="your image" style="margin:12px;">
+              <table class="table">
+              {{ login_details_form.as_table }}
+              </table>
+            </th>
           </div>
           <br>
-          <button id='submit' type="submit" class="btn btn-secondary" id="submit">Submit</button>
+        <th scope="col">
+          <button id='submit' type="submit" class="btn btn-secondary" id="submit" style="margin:12px;">Submit</button>
+        </th>
+        </table>
       </form>
   </div>
- <img src="{{ path }}" alt="The screen capture will appear in this box.">
+ {% comment %} <img src="{{ path }}" alt="The screen capture will appear in this box."> {% endcomment %}
 </div>
 
 {% else %}{% endif %}

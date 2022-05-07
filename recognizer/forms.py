@@ -23,13 +23,24 @@ class UserProfileForm(forms.ModelForm):
     birth_date = forms.DateField(widget = forms.SelectDateWidget())
     class Meta():
         model = UserProfile
-        fields = ['image', 'about', 'gender', 'birth_date',
+        fields = ['about', 'gender', 'birth_date',
                   'phone_number', 'website', 'github_username',
                   'twitter_handle', 'instagram_username', 'facebook_username', "college", "company", "branch"]
 
         
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+            
+class UserProfileImageForm(forms.ModelForm):
+
+    class Meta():
+        model = UserProfile
+        fields = ['image']
+    
+    def __init__(self, *args, **kwargs):
+        super(UserProfileImageForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
             

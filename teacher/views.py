@@ -13,8 +13,9 @@ def profile_view(request):
         context['teacher'] = teacher
         context['user_profile'] = teacher.user.user_profile.all().first()
         print(teacher.user.user_profile)
-        context['students_attended_teachers_lecture'] = LoginDetails.objects.filter(teacher__user__username=request.user.username).order_by('-login_date').order_by('-login_time')
+        context['students_attended_teachers_lecture'] = LoginDetails.objects.filter(teacher__user=request.user).order_by('-login_date').order_by('-login_time')
     except:
         return redirect('recognizer:logout-cnf')
     
-    return render(request, 'teacher/home/index.html', context=context)
+    return render(request, 'teacher/dashboard.html', context=context)
+

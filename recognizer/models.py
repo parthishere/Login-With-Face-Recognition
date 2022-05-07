@@ -100,6 +100,11 @@ class UserProfile(models.Model):
                 this.image.delete(save=False)
         except: pass
         super(UserProfile, self).save(*args, **kwargs)
+        
+    @property
+    def get_absolute_url(self):
+        return reverse("recognizer:profile", kwargs={"pk": self.pk})
+    
     
     
 def user_post_save_receiver(sender, instance, *args, **kwargs):
@@ -217,5 +222,11 @@ pre_save.connect(pre_save_change_website_reciever, sender=ChangeWebsiteCount)
 
 
 class IPAddress(models.Model):
-    ipAddress = models.CharField(null=True, blank=True)
+    ipAddress1 = models.CharField(null=True, blank=True, max_length=100)
+    ipAddress2 = models.CharField(null=True, blank=True, max_length=100)
+    teacher = models.ForeignKey(TeacherProfileModel, on_delete=models.CASCADE)
+    
+    
+    def __str__(self):
+        return self.ipAddress1 + " " + self.ipAddress2 + " " + str(self.teacher.user.username) 
     

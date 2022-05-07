@@ -13,15 +13,7 @@
       <li class="nav-item active">
         <a class="nav-link" href="{% url 'recognizer:home' %}">Home <span class="sr-only">(current)</span></a>
       </li>
-      {% comment %} <li class="nav-item">
-        <a class="nav-link" href="{% url 'main_app:archive-list' %}">Archives<span class="badge badge-light">{{ request.session.archive_count }}</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'main_app:completed-list' %}">Completed<span class="badge badge-light">{{ request.session.completed_count }}</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'main_app:starred-list' %}">Starred<span class="badge badge-light">{{ request.session.starred_count }}</span></a>
-      </li>{% endcomment %}
+
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href={% if request.user_pk %}"{% url 'recognizer:profile' pk=request.user_pk %}"{% else %}{% endif %} id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Account
