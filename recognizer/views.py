@@ -192,6 +192,7 @@ def allow_by_ip(view_func):
     return authorize
 
 # @allow_by_ip
+@login_required(login_url='recognizer:login')
 def home_view(request):
     
     context = {}
@@ -297,6 +298,7 @@ def home_view(request):
     return render(request, 'recognizer/home.html', context=context)
 
 #AJAX
+
 
 def load_lectures(request):
     teacher_id = request.GET.get('teacher')
