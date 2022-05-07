@@ -191,7 +191,7 @@ def allow_by_ip(view_func):
         return HttpResponse('Invalid Ip Access!')
     return authorize
 
-@allow_by_ip
+# @allow_by_ip
 def home_view(request):
     
     context = {}
