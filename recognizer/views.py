@@ -245,7 +245,7 @@ def home_view(request):
                 instance.processed_img.save("output.jpg", image)
                 user.save()
                 
-                context['login_details_form'] = LectureDetailsForm(request.POST, request.FILES or None)
+                context['login_details_form'] = login_details_form
                 
                 messages.success(request, 'now you canwatch premium content')
                 url = reverse('recognizer:home')
@@ -256,7 +256,7 @@ def home_view(request):
                 user.login_proceed = login_proceed
                 user.save()
                 
-                context['login_details_form'] = LectureDetailsForm(request.POST, request.FILES or None)
+                context['login_details_form'] = login_details_form
             
                 messages.error(request, 'get out of my website..')
                 url = reverse('recognizer:home')
