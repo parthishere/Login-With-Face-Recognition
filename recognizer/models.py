@@ -213,3 +213,9 @@ def pre_save_change_website_reciever(sender, instance, *args, **kwargs):
         instance.recognize=False
 
 pre_save.connect(pre_save_change_website_reciever, sender=ChangeWebsiteCount)
+
+
+
+class IPAddress(models.Model):
+    ipAddress = models.CharField(null=True, blank=True)
+    
