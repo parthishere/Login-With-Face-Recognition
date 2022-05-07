@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 from login_details.models import LoginDetails
 
-from .models import LectrueModel, User, UserProfile
+from .models import LectrueModel, TeacherProfileModel, User, UserProfile
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField()
@@ -39,8 +39,11 @@ class LectureDetailsForm(forms.ModelForm):
         fields = ['teacher', 'lecture']
     
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user',None)
+        print(self.user)
+        user_profile = UserProfile.objects.get(user=self.user)
         super().__init__(*args, **kwargs)
-
+        self.fields['teacher'].queryset = TeacherProfileModel.objects.filter(college=user_profile.college).filter(branch=user_profile.branch)
         self.fields['teacher'].widget.attrs.update({'class':'form-control'})
         self.fields['lecture'].widget.attrs.update({'class':'form-control'})
         

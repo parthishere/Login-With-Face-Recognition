@@ -180,6 +180,18 @@ def another_home_view(request):
 
 # Create your views here.
 
+allowedIps = ['129.0.0.1', '127.0.0.1']
+
+def allow_by_ip(view_func):
+    def authorize(request, *args, **kwargs):
+        user_ip = request.META['REMOTE_ADDR']
+        for ip in allowedIps:
+            if ip==user_ip:
+                return view_func(request, *args, **kwargs)
+        return HttpResponse('Invalid Ip Access!')
+    return authorize
+
+@allow_by_ip
 def home_view(request):
     
     context = {}
@@ -193,7 +205,7 @@ def home_view(request):
         pass
     
     context['data'] = 'Add your cool photo to your profile !'
-    login_details_form = LectureDetailsForm(request.POST, request.FILES or None)
+    login_details_form = LectureDetailsForm(request.POST, request.FILES, user=request.user)
     context['login_details_form'] = login_details_form
 
     is_teacher=False
