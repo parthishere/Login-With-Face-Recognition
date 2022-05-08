@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from recognizer.models import User, UserProfile, TeacherProfileModel, LectrueModel
 from login_details.models import LoginDetails
 from recognizer.views import login_view
-from .forms import IpAddress, TeacherUpdateForm
+from .forms import IpAddress, TeacherUpdateForm, LectureForm
 
 # Create your views here.
 @user_passes_test(lambda u: u.is_superuser)
@@ -125,18 +125,19 @@ def lecture_list_view(request):
     return render(request, 'teacher/lectures.html', context=context)
 
 
+def lec_detail_view(request, pk=None):
+    context = {}
+    return render(request, 'teacher/lectures-detail.html', context=context) 
+
 @user_passes_test(lambda u: u.is_superuser)
 def add_lecture(request):
     context = {}
-    try:
+    form = LectureForm(request.POST or None)
+    context['form'] = form
+    if request.POST and form.is_valid:
         teacher = TeacherProfileModel.objects.get(user=request.user)
-        context['teacher'] = teacher
-        context['user_profile'] = teacher.user.user_profile.all().first()
-        print(teacher.user.user_profile)
-        lectures = LectrueModel.objects.filter(teacher=teacher)
-        context['objects'] = lectures
-
-    except:
-        return redirect('recognizer:logout-cnf')
+        instance = form.save(teacher=teacher)
+        context['form'] = form
+        return redirect('teacher:lec')
     
-    return render(request, 'teacher/lectures.html', context=context)
+    return render(request, 'teacher/update-teacher-profile.html', context=context)

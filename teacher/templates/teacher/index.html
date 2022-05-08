@@ -61,7 +61,8 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
           <a class="dropdown-item" href="{% url "recognizer:home" %}">Home</a>
-          <a class="dropdown-item" href="{% url "teacher:update-profile" %}">Update Profile</a>
+          <a class="dropdown-item" href="{% url "teacher:update-profile" %}">Update Dashboard</a>
+          <a class="dropdown-item" href="{% url "teacher:add-lec" %}">Add Lectures</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="{% url 'recognizer:logout' %}">Logout</a>
         </div>
@@ -157,6 +158,7 @@
             </div>
           </div>
 
+
           <form method='POST' id='myForm' action="{% url 'recognizer:change-website' %}">
             <input type='hidden' name='next' value="{{ request.get_full_path }}">
             {% csrf_token %}
@@ -196,7 +198,7 @@
                 </div>
                 <div class="mr-5">Your Lectures</div>
               </div>
-              <a class="card-footer text-white clearfix small z-1" href="{% url 'teacher:lectures' %}">
+              <a class="card-footer text-white clearfix small z-1" href="{% url 'teacher:lec' %}">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                   <i class="fas fa-angle-right"></i>
@@ -264,13 +266,11 @@
       <!-- /.container-fluid -->
 
       <!-- Sticky Footer -->
-      <footer class="sticky-footer">
-        <div class="container my-auto">
-          <div class="copyright text-center my-auto">
-            <span>Copyright © Parth Thakkar</span>
-          </div>
-        </div>
-      </footer>
+      <footer class="footer text-center sticky-footer">
+        <div class="container">
+            <small class="copyright">Copyright @ <a class='no-blue' href="https://stormy-hemlet.herokuapp.com">Thakkar Parth </a></small>
+        </div><!--//container-->
+    </footer> 
 
     </div>
     <!-- /.content-wrapper -->

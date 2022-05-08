@@ -1,6 +1,6 @@
 from django import forms
 
-from recognizer.models import TeacherProfileModel
+from recognizer.models import TeacherProfileModel, LectrueModel
 
 
 class TeacherUpdateForm(forms.ModelForm):
@@ -21,5 +21,16 @@ class IpAddress(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super(IpAddress, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+            
+            
+class LectureForm(forms.ModelForm):
+    class Meta():
+        model = LectrueModel
+        fields = ['lecture_name', 'branch']
+        
+    def __init__(self, *args, **kwargs):
+        super(LectureForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'

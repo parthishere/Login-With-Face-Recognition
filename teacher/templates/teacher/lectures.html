@@ -2,13 +2,37 @@
 
 {% block body_block %}
 <br>
-{{ teacher.username }}
+<center>
+    <b><h4> Lectures List by {{ teacher.user.username | upper }}</b></h4>
+    {{ teacher.username }}
 {{ teacher.college }}
 {{ teacher.branch }}
+    </center>
+    <br>
+
 <hr>
 <br>
-{% for obj in objects %}
-{{ obj }}
+{% for object in objects %}
+<center>
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">Lecture</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <p>{{ object.lecture_name }} of Branch: {{ object.branch }}</p>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
 {% endfor %}
 
 

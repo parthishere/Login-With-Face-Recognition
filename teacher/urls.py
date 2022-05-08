@@ -2,7 +2,15 @@ import profile
 from django.contrib import admin
 from django.urls import path
 
-from .views import profile_view, profile_list_view, teacher_profile_list_view, teacher_profile_update_view, update_ips
+from .views import (
+    profile_view, 
+    profile_list_view, 
+    teacher_profile_list_view,
+    teacher_profile_update_view,
+    update_ips,
+    lecture_list_view,
+    add_lecture
+)
 
 app_name = 'teacher'
 
@@ -13,4 +21,8 @@ urlpatterns = [
     path('teachers/', teacher_profile_list_view, name='teacher-list'),
     path('profile/update', teacher_profile_update_view, name='update-profile'),
     path('profile/update/ip', update_ips, name='ip-update'),
+    path('lectures/', lecture_list_view, name='lec'),
+    path('lectures/add', add_lecture, name='add-lec'),
+    path('lectures/update', update_ips, name='lec-update'),
+    
 ]    
