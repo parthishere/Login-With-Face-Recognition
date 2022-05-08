@@ -213,8 +213,10 @@ def home_view(request):
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
             
-            
+        print(allowed_ips)    
         user_ip = request.META['REMOTE_ADDR']
+        print("\n\n\n\n\n\n\n\n user ip \n\n\n\n\n\n\n\n")
+        print(user_ip)
         lecture_object = LectrueModel.objects.get(id=lecture)
         o = teacher_user.change_website_objects.all().count()
         if o == 0:
