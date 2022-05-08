@@ -262,7 +262,7 @@ def home_view(request):
                 
                 context['login_details_form'] = login_details_form
                 
-                messages.success(request, 'now you canwatch premium content')
+                messages.success(request, f'Your face was recognized as {request.user.username} - {user.enrollment_number}')
                 url = reverse('recognizer:home')
                 
                 return JsonResponse(status = 302 , data = {'success' : url })
@@ -273,11 +273,11 @@ def home_view(request):
                 
                 context['login_details_form'] = login_details_form
             
-                messages.error(request, 'get out of my website..')
+                messages.error(request, 'Face not recognized !')
                 url = reverse('recognizer:home')
                 return JsonResponse(status = 302 , data = {'success' : url })
         else:
-            messages.error(request,"Can't take attendance")
+            messages.error(request,f"Session hasn't started by {teacher_user.user.username}, Can't take attendance")
             return HttpResponseRedirect(reverse('recognizer:home'))
     
     return render(request, 'recognizer/home.html', context=context)

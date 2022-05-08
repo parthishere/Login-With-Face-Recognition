@@ -98,3 +98,7 @@ def detectImage(frame, details):
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     
     return frame, proceed_login, names, known_face_names
+
+
+
+# def detectImageForSuperUser(frame, details):

@@ -88,7 +88,7 @@ def teacher_profile_update_view(request):
                 context = {
                     'form':edit_form,
                 }
-                messages.error(request, "Somthing is wrong , i can feel it")
+                messages.error(request, "Somthing is wrong ..")
 
     return render(request, 'teacher/update-teacher-profile.html', context=context)
 
@@ -138,6 +138,7 @@ def add_lecture(request):
         teacher = TeacherProfileModel.objects.get(user=request.user)
         instance = form.save(teacher=teacher)
         context['form'] = form
+        messages.success(request, "Lecture Added Succsessfully")
         return redirect('teacher:lec')
     
     return render(request, 'teacher/update-teacher-profile.html', context=context)
