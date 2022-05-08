@@ -87,6 +87,7 @@ class UserProfile(models.Model):
     instagram_username = models.CharField(max_length=100, null=True, blank=True)
     facebook_username = models.CharField(max_length=100, null=True, blank=True)
     login_proceed = models.BooleanField(default=False)
+    updated = models.BooleanField(default=False)
     
     
     def __str__(self):
@@ -152,7 +153,8 @@ class TeacherProfileModel(models.Model):
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teacher_profile')
-
+    ip1 = models.CharField(null=True, blank=True, max_length=15) 
+    ip2 = models.CharField(null=True, blank=True, max_length=15)
 
     about = models.CharField(max_length=30, null=True, blank=True)
 
@@ -169,15 +171,8 @@ class TeacherProfileModel(models.Model):
 def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
     try:
         obj = TeacherProfileModel.objects.get(user=instance)
-        print("in first try")
     except:
         obj = None
-        print('in first except')
-        
-    print(instance)
-    print(instance.id)
-    print(instance.is_staff)
-    print(instance.is_superuser)
 
     if instance.is_superuser and obj is None:
         obj = TeacherProfileModel.objects.create(user=instance)

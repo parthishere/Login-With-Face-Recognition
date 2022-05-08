@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+
 {% block body_block %}
 
 {% for message in messages %}
@@ -8,19 +9,19 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 {% endfor %}
-
-<center> <h1> Create Account </h1>
-
-<p> Allready have an account, go to <a href="{% url 'recognizer:login' %}">Login</a></center>
+<br>
+</br>
 <div class='container-sm'>
-<form class='form-control' method='POST' >
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="hidden" name="next" value="{{ request.GET.next }}"/>
-    <input type='submit'>
+<form method='POST' class='form-control' enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+<input class='form-control btn btn-primary' type='submit' value='submit'>
+<br>
+</br>
+<hr>
 </form>
 </div>
 
 
-
 {% endblock %}
+

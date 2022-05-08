@@ -32,11 +32,11 @@
                     <div class="mt-3">
                       <h4>{{ object.user.username }}</h4>
                       {% if teacher %}
-                      <h4><b>Teacher<b><h4>
+                      Teacher
                         {% else %}{% endif %}
-                      <p class="text-secondary mb-1">{{ object.user.email }}</p>
+                      <p>{{ object.user.email }}</p>
           
-                      <p class="text-muted font-size-sm">{{ object.about }}</p>
+                      <p class="text font-size-sm">{{ object.about }}</p>
                       {% comment %} <button class="btn btn-primary">Follow</button> {% endcomment %}
                       <button class="btn btn-outline-primary">Message</button> <- under constuction
                     </div>
@@ -103,7 +103,34 @@
                       <h6 class="mb-0">About</h6>
                     </div>
                     <div class="col-sm-9 text-secondary">
-                      XYZ
+                      {{ object.about }}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">College</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{ object.college }}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">Branch</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{ object.branch }}
+                    </div>
+                  </div>
+                  <hr>
+                  <div class="row">
+                    <div class="col-sm-3">
+                      <h6 class="mb-0">Enroll Number</h6>
+                    </div>
+                    <div class="col-sm-9 text-secondary">
+                      {{ object.enrollment_number }}
                     </div>
                   </div>
                   <hr>

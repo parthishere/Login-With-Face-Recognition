@@ -4,12 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http.response import HttpResponse, StreamingHttpResponse, JsonResponse
 import cv2
-import os 
-from django.conf import settings
 from django.core.files.base import ContentFile
 
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
-from .forms import UserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
+from .forms import FirstTimeUserProfileForm, SecondTimeUserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
 from .recognizer import RecognizerClass, Recognizer 
 from django.http import JsonResponse
 
@@ -123,6 +121,9 @@ def change_whole_site_by_clicking(request):
     
     context = {}
     if request.method == 'POST':
+        next_ = request.POST['next']
+        print('next')
+        print(next_)
         if request.user.is_superuser or request.user in request.user.teacher_profile.all():
             teacher = request.user.teacher_profile.all().last()
 
@@ -134,7 +135,8 @@ def change_whole_site_by_clicking(request):
                 c = ChangeWebsiteCount.objects.create(teacher=teacher)
                 change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
                 context['recognize'] = c.recognize
- 
+            if next:
+                return redirect(next_)
             return redirect('recognizer:home')
         else:
             return redirect('recongizer:home')
@@ -161,7 +163,7 @@ def allow_by_ip(view_func):
 # @allow_by_ip
 @login_required(login_url='recognizer:login')
 def home_view(request):
-    print(request.META['REMOTE_ADDR'])
+    
     context = {}
     context['change_site_count'] = 0
     context['recognize'] = False
@@ -197,20 +199,38 @@ def home_view(request):
     # this is new 
     
     if request.method == 'POST' and login_details_form.is_valid():
-        print("request.POST  "+str(request.POST))
-        print("request.FILES  "+str(request.FILES))
-        print("form.cleaned_data  "+str(login_details_form.cleaned_data))
         file = request.FILES.get('image_file').read()  # src is the name of input attribute in your html file, this src value is set in javascript code
         teacher = request.POST['teacher']
         lecture = request.POST['lecture']
+        ip1, ip2 = None, None
+        try:
+            ip1 = request.POST['ip1']
+            ip2 = request.POST['ip2']
+        except:
+            pass
         teacher_user = TeacherProfileModel.objects.get(id=teacher)
+        if request.user == teacher_user.user and (ip1 or ip2):
+            teacher_user.ip1 = ip1
+            teacher_user.ip2 = ip2
+            teacher_user.save()
+        print("ip1 "+teacher_user.ip1)
+        allowed_ips = []
+        allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:2])
+        allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256))
+        for mask in allowed_masks:
+            allowed_ips.append(str(allowed_ip_host)+str(mask))
+        print(allowed_ips)
+        user_ip = request.META['REMOTE_ADDR']
         lecture_object = LectrueModel.objects.get(id=lecture)
         o = teacher_user.change_website_objects.all().count()
         if o == 0:
             print("no objects")
         c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user).order_by('id').last()
         context['recognize'] = c.recognize
-
+        
+        if not user_ip in allowed_ips:
+            messages.error(request,"Your IP is not in same subnet IPs")
+            return HttpResponseRedirect(reverse('recognizer:home'))
         
         if o%2==0:
 
@@ -380,7 +400,7 @@ def profile_view(request, pk=None):
 
     context['login_object'] = login_instance
     try:
-        if User.objects.get(pk=pk).teacher_profile.all().first():
+        if instance.user.teacher_profile.all().first():
             context['teacher'] = True
 
         else:
@@ -393,11 +413,15 @@ def profile_view(request, pk=None):
 
 @login_required(login_url='recognizer:login')
 def update_profile_view(request, pk=None):
+    edit_form = None
     try: 
         instance = UserProfile.objects.get(pk=pk)
     except:
         instance = None
-    edit_form = UserProfileForm(request.POST or None, instance=instance)
+    if not instance.updated or instance.user.is_superuser:
+        edit_form = FirstTimeUserProfileForm(request.POST or None, instance=instance)
+    else:
+        edit_form = SecondTimeUserProfileForm(request.POST or None, instance=instance)
     context = {
             'form':edit_form,
         }
@@ -405,6 +429,7 @@ def update_profile_view(request, pk=None):
         if request.POST:
             if edit_form.is_valid:
                 user = edit_form.save()
+                instance.updated = True
                 instance.save()
                 
                 messages.success(request, "Profile Edited Sucsessfuly")
