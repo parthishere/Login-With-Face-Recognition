@@ -142,3 +142,7 @@ def add_lecture(request):
         return redirect('teacher:lec')
     
     return render(request, 'teacher/update-teacher-profile.html', context=context)
+
+
+def search_student(request):
+    pass

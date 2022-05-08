@@ -70,6 +70,15 @@ class UserProfile(models.Model):
         ('IT', 'INFORMATION AND TECHNOLOGY'),
     )
     
+    SEMESTER_CHOICES = (
+        '1', '1st Semester',
+        '2', '2nd Semester',
+        '3', '3rd Semester',
+        '4', '4th Semester',
+        '5', '5th Semester',
+        '6', '6th Semester',
+    )
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile', unique=True)
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
@@ -78,6 +87,7 @@ class UserProfile(models.Model):
     college = models.CharField(choices=COLLEGE_CHOICES, max_length=5)
     company = models.CharField(max_length=100,null=True, blank=True)
     branch = models.CharField(choices=BRANCH_CHOICES,max_length=3)
+    semester = models.CharField(choices=SEMESTER_CHOICES, max_length=1, default='1')
     enrollment_number = models.IntegerField(default='190280111140')
     birth_date = models.DateField(null=True, blank=True)
     phone_number = models.IntegerField(default='1234567890')
@@ -189,8 +199,18 @@ class LectrueModel(models.Model):
         ('IT', 'INFORMATION AND TECHNOLOGY'),
     )
     
+    SEMESTER_CHOICES = (
+        '1', '1st Semester',
+        '2', '2nd Semester',
+        '3', '3rd Semester',
+        '4', '4th Semester',
+        '5', '5th Semester',
+        '6', '6th Semester',
+    )
+    
     lecture_name = models.CharField(default="", max_length=100)
     teacher = models.ForeignKey(TeacherProfileModel, blank=True, null=True, related_name='lectures', on_delete=models.CASCADE)
+    semester = models.CharField(SEMESTER_CHOICES, default='1', max_length=1)
     branch = models.CharField(choices=BRANCH_CHOICES, null=True, blank=True, max_length=5)
        
     def __str__(self):

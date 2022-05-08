@@ -25,7 +25,7 @@ class FirstTimeUserProfileForm(forms.ModelForm):
         model = UserProfile
         fields = ['image', 'enrollment_number', 'about', 'gender', 'birth_date',
                   'phone_number', 'website', 'github_username',
-                  'twitter_handle', 'instagram_username', 'facebook_username', "college", "company", "branch"]
+                  'twitter_handle', 'instagram_username', 'facebook_username', "college", "company", "branch", "semester"]
 
         
     def __init__(self, *args, **kwargs):
@@ -51,7 +51,7 @@ class UserProfileImageForm(forms.ModelForm):
 
     class Meta():
         model = UserProfile
-        fields = ['image', 'enrollment_number', "college", "company", "branch"]
+        fields = ['image', 'enrollment_number', "college", "company", "branch", "semester"]
     
     def __init__(self, *args, **kwargs):
         super(UserProfileImageForm, self).__init__(*args, **kwargs)
@@ -83,10 +83,7 @@ class LectureDetailsForm(forms.ModelForm):
                 pass  # invalid input from the client; ignore and fallback to empty City queryset
         elif self.instance.pk:
             self.fields['lecture'].queryset = self.instance.teacher.lectures.order_by('-id')
-    # def __init__(self, *args, **kwargs):
-    #     super(LectureDetailsForm, self).__init__(*args, **kwargs)
-    #     for visible in self.visible_fields():
-    #         visible.field.widget.attrs['class'] = 'form-control'
+
             
             
     

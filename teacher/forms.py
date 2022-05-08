@@ -28,7 +28,7 @@ class IpAddress(forms.ModelForm):
 class LectureForm(forms.ModelForm):
     class Meta():
         model = LectrueModel
-        fields = ['lecture_name', 'branch']
+        fields = ['lecture_name', 'branch', 'semester']
         
     def __init__(self, *args, **kwargs):
         super(LectureForm, self).__init__(*args, **kwargs)
