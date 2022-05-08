@@ -200,14 +200,14 @@ def home_view(request):
             teacher_user.ip1 = ip1
             teacher_user.save()
 
-        if teacher.ip1:
+        if teacher_user.ip1:
             allowed_ips = []
             allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:2])
             allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256))
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
          
-        if teacher.ip2:   
+        if teacher_user.ip2:   
             allowed_ip_host = ".".join(teacher_user.ip2.split('.')[0:2])
             allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256)) 
             for mask in allowed_masks:
