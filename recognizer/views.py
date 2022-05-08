@@ -202,14 +202,14 @@ def home_view(request):
 
         if teacher_user.ip1:
             allowed_ips = []
-            allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:2])
-            allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256))
+            allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:3])
+            allowed_masks = (".{}".format(i) for i in range(256))
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
          
         if teacher_user.ip2:   
-            allowed_ip_host = ".".join(teacher_user.ip2.split('.')[0:2])
-            allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256)) 
+            allowed_ip_host = ".".join(teacher_user.ip2.split('.')[0:3])
+            allowed_masks = (".{}".format(i) for i in range(256)) 
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
             
@@ -224,7 +224,8 @@ def home_view(request):
         
         if not user_ip in allowed_ips:
             messages.error(request,"Your IP is not in same subnet IPs")
-            return HttpResponseRedirect(reverse('recognizer:home'))
+            url = reverse('recognizer:home')
+            return JsonResponse(status = 302 , data = {'success' : url })
         
         if o%2==0:
 
@@ -263,7 +264,7 @@ def home_view(request):
                 
                 messages.success(request, 'now you canwatch premium content')
                 url = reverse('recognizer:home')
-                # return HttpResponseRedirect(reverse('recognizer:home'))
+                
                 return JsonResponse(status = 302 , data = {'success' : url })
             else:
                 context['login_detail'] = False
