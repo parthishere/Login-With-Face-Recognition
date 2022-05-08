@@ -32,14 +32,20 @@
 <hr>
 
 {% comment %} <a href="{% url 'recognizer:redirect_stream' %}">go here</a> {% endcomment %}
-<form method='POST' action="{% url 'teacher:ip-update' %}">
 {% if request.user.teacher_profile.all.first %}
+<form method='POST' action="{% url 'teacher:ip-update' %}">
+<b> Your Selected IPs </b>: <ol>
+  <li> {{ request.user.teacher_profile.all.first.ip1 }}</li>
+    <li> {{ request.user.teacher_profile.all.first.ip2 }}</li>
+</ol>
+  <br>
 {% csrf_token %}
 IP address
           <input type='text' name='ip1'>
           <button id='submit' type="submit" class="btn btn-secondary" id="submit" style="margin:12px;">Submit</button>
-{% else %}{% endif %}
+
 </form> 
+{% else %}{% endif %}
 <div class='container-sm'>
 {% if teacher %}
 {% else %}
