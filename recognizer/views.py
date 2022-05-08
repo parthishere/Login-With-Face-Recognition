@@ -215,8 +215,9 @@ def home_view(request):
             
         print(allowed_ips)    
         user_ip = request.META['REMOTE_ADDR']
+        user_ip_2 = request.META['HTTP_X_FORWARDED_FOR']
         print("\n\n\n\n\n\n\n\n user ip \n\n\n\n\n\n\n\n")
-        print(user_ip)
+        print(user_ip_2)
         lecture_object = LectrueModel.objects.get(id=lecture)
         o = teacher_user.change_website_objects.all().count()
         if o == 0:
