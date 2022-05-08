@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+<br>
+{{ teacher.username }}
+{{ teacher.college }}
+{{ teacher.branch }}
+<hr>
+<br>
+{% for obj in objects %}
+{{ obj }}
+{% endfor %}
+
+
+{% endblock %}

@@ -56,7 +56,7 @@ def export_users_xls(request):
     format1 = 'D-MMM-YY'
     format2 = 'h:mm:ss AM/PM'
 
-    columns = ['User', 'Authenticated user', 'Teacher', 'Lecture', 'Login date', 'Login time', "Authenticated Images"]
+    columns = ['Enrollment number', 'User', 'Authenticated user', 'Teacher', 'Lecture', 'Login date', 'Login time', "Authenticated Images"]
 
     for col_num in range(len(columns)):
         ws.write(row_num, col_num, columns[col_num], header_style)
@@ -64,35 +64,35 @@ def export_users_xls(request):
     # Sheet body, remaining rows
     font_style = xlwt.XFStyle()
     teacher = TeacherProfileModel.objects.get(user=request.user)
-    rows = list(LoginDetails.objects.filter(teacher=teacher).values_list('user', 'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
+    rows = list(LoginDetails.objects.filter(teacher=teacher).values_list('enrollment_number', 'user', 'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
     print("rows")
     
     for row in rows:
         row = list(row)
-        user = User.objects.get(id=row[0])
-        row[0] = str(User.objects.get(id=row[0]).username) + ' ' + str(UserProfile.objects.get(user=user).unique_id) #user
-        row[2] = str(TeacherProfileModel.objects.get(id=row[2]).user.username)
-        row[3] = str(LectrueModel.objects.get(id=row[3]).lecture_name) + 'by' + str(LectrueModel.objects.get(id=row[3]).teacher.user.username)
-        print(row[0])
+        user = User.objects.get(id=row[1])
+        row[1] = str(User.objects.get(id=row[1]).username) + ' ' + str(UserProfile.objects.get(user=user).unique_id) #user
+        row[3] = str(TeacherProfileModel.objects.get(id=row[3]).user.username)
+        row[4] = str(LectrueModel.objects.get(id=row[4]).lecture_name) + 'by' + str(LectrueModel.objects.get(id=row[4]).teacher.user.username)
+
         row_num += 1
         ws.row(row_num).height_mismatch = True
 
         
         
         for col_num in range(len(row)):
-            if col_num == 4:
+            if col_num == 5:
                 #date
                 style = xlwt.XFStyle()
                 style.num_format_str = format1
                 ws.write(row_num, col_num, row[col_num], style)
 
-            elif col_num == 5:
+            elif col_num == 6:
                 #time
                 style = xlwt.XFStyle()
                 style.num_format_str = format2
                 ws.write(row_num, col_num, row[col_num], style)
                 
-            elif col_num == 6:
+            elif col_num == 7:
                 #image 
                 path = LoginDetails.objects.filter(teacher=teacher)[row_num-1].processed_img.path
                 # path2 = os.path.abspath(path)
@@ -147,18 +147,7 @@ from .streamer import get_face_detect_data
 
 
 
-# Create your views here.
-
-ALLOWED_IPS = ['192.168.{}.{}'.format(i,j) for i in range(256) for j in range(256)]
-
-def allow_by_ip(view_func):
-    def authorize(request, *args, **kwargs):
-        user_ip = request.META['REMOTE_ADDR']
-        for ip in ALLOWED_IPS:
-            if ip==user_ip:
-                return view_func(request, *args, **kwargs)
-        return HttpResponse('Invalid Ip Access!')
-    return authorize
+# Create your views here
 
 # @allow_by_ip
 @login_required(login_url='recognizer:login')
@@ -205,21 +194,27 @@ def home_view(request):
         ip1, ip2 = None, None
         try:
             ip1 = request.POST['ip1']
-            ip2 = request.POST['ip2']
         except:
             pass
         teacher_user = TeacherProfileModel.objects.get(id=teacher)
         if request.user == teacher_user.user and (ip1 or ip2):
             teacher_user.ip1 = ip1
-            teacher_user.ip2 = ip2
             teacher_user.save()
-        print("ip1 "+teacher_user.ip1)
-        allowed_ips = []
-        allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:2])
-        allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256))
-        for mask in allowed_masks:
-            allowed_ips.append(str(allowed_ip_host)+str(mask))
-        print(allowed_ips)
+
+        if teacher.ip1:
+            allowed_ips = []
+            allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:2])
+            allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256))
+            for mask in allowed_masks:
+                allowed_ips.append(str(allowed_ip_host)+str(mask))
+         
+        if teacher.ip2:   
+            allowed_ip_host = ".".join(teacher_user.ip2.split('.')[0:2])
+            allowed_masks = (".{}.{}".format(i,j) for i in range(256) for j in range(256)) 
+            for mask in allowed_masks:
+                allowed_ips.append(str(allowed_ip_host)+str(mask))
+            
+            
         user_ip = request.META['REMOTE_ADDR']
         lecture_object = LectrueModel.objects.get(id=lecture)
         o = teacher_user.change_website_objects.all().count()
@@ -260,7 +255,7 @@ def home_view(request):
                 context['login_detail'] = True
                 user.login_proceed = login_proceed
                 
-                instance = LoginDetails.objects.create(user=request.user, lecture=lecture_object, teacher=teacher_user)
+                instance = LoginDetails.objects.create(user=request.user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user.enrollment_number)
                 print("connected")
                 instance.processed_img.save("output.jpg", image)
                 user.save()

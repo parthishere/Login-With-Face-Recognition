@@ -194,9 +194,9 @@
                 <div class="card-body-icon">
                   <i class="fas fa-fw fa-life-ring"></i>
                 </div>
-                <div class="mr-5">13 New Tickets!</div>
+                <div class="mr-5">Your Lectures</div>
               </div>
-              <a class="card-footer text-white clearfix small z-1" href="#">
+              <a class="card-footer text-white clearfix small z-1" href="{% url 'teacher:lectures' %}">
                 <span class="float-left">View Details</span>
                 <span class="float-right">
                   <i class="fas fa-angle-right"></i>
@@ -217,6 +217,7 @@
                 
                 <thead>
                   <tr>
+                    <th>Enroll no.</th>
                     <th>Name</th>
                     <th>Date</th>
                     <th>Time</th>
@@ -230,7 +231,7 @@
                   
                   {% for obj in students_attended_teachers_lecture %}
                   <tr style="margin:10px">
-                  
+                    <th>{{ obj.enrollment_number }}</th>
                     <th><a href="{{ obj.user.user_profile.all.first.get_absolute_url }}">{{ obj.user }}</a></th>
                     <th>{{ obj.login_date }}</th>
                     <th>{{ obj.login_time }}</th>

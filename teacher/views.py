@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, HttpResponseRedirect, reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
-from recognizer.models import User, UserProfile, TeacherProfileModel
+from recognizer.models import User, UserProfile, TeacherProfileModel, LectrueModel
 from login_details.models import LoginDetails
 from recognizer.views import login_view
 from .forms import IpAddress, TeacherUpdateForm
@@ -106,3 +106,37 @@ def update_ips(request):
         
     except:
         return redirect("recognizer:login")
+    
+    
+@user_passes_test(lambda u: u.is_superuser)
+def lecture_list_view(request):
+    context = {}
+    try:
+        teacher = TeacherProfileModel.objects.get(user=request.user)
+        context['teacher'] = teacher
+        context['user_profile'] = teacher.user.user_profile.all().first()
+        print(teacher.user.user_profile)
+        lectures = LectrueModel.objects.filter(teacher=teacher)
+        context['objects'] = lectures
+
+    except:
+        return redirect('recognizer:logout-cnf')
+    
+    return render(request, 'teacher/lectures.html', context=context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_lecture(request):
+    context = {}
+    try:
+        teacher = TeacherProfileModel.objects.get(user=request.user)
+        context['teacher'] = teacher
+        context['user_profile'] = teacher.user.user_profile.all().first()
+        print(teacher.user.user_profile)
+        lectures = LectrueModel.objects.filter(teacher=teacher)
+        context['objects'] = lectures
+
+    except:
+        return redirect('recognizer:logout-cnf')
+    
+    return render(request, 'teacher/lectures.html', context=context)
