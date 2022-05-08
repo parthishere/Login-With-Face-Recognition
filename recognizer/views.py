@@ -155,6 +155,7 @@ def home_view(request):
     context = {}
     context['change_site_count'] = 0
     context['recognize'] = False
+    
     try:
         teacher = request.user.teacher_profile.all().last()
         change_site_count = teacher.change_website_objects.all().count()
@@ -199,6 +200,9 @@ def home_view(request):
         if request.user == teacher_user.user and (ip1 or ip2):
             teacher_user.ip1 = ip1
             teacher_user.save()
+            
+        user_ip = request.META['HTTP_X_FORWARDED_FOR']
+        context['user_ip'] = user_ip
 
         if teacher_user.ip1:
             allowed_ips = []
@@ -213,12 +217,9 @@ def home_view(request):
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
             
-        print(allowed_ips)    
-        user_ip = request.META['REMOTE_ADDR']
-        user_ip_2 = request.META['HTTP_X_FORWARDED_FOR']
+        
         print("\n\n\n\n\n\n\n\n user ip \n\n\n\n\n\n\n\n")
         print(user_ip)
-        print(user_ip_2)
         print("\n\n\n")
         lecture_object = LectrueModel.objects.get(id=lecture)
         o = teacher_user.change_website_objects.all().count()

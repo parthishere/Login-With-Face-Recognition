@@ -9,7 +9,7 @@
 
 {% block body_block %}
 
-
+{{ user_ip }}
 <spacer type="vertical" width="1000" height="1000">  </spacer>
 <div class='container-fluid'>
 {% if messages %}
@@ -24,7 +24,7 @@
 
 
 {% endif %}
-<div >
+<div>
 <p>
 {{ data }} {% if not user.image %} <a href="{% url 'recognizer:update-profile' pk=user.pk %}"> Update Profile {% else %}{% endif %}</a>
 <p>
