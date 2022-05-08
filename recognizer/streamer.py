@@ -50,7 +50,7 @@ def detectImage(frame, details):
     face_locations = []
     face_encodings = []
 
-    print(known_face_names)
+    # print(known_face_names)
 
     face_locations = face_recognition.face_locations(frame)
     face_encodings = face_recognition.face_encodings(frame, face_locations)

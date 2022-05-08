@@ -65,7 +65,7 @@ def export_users_xls(request):
     font_style = xlwt.XFStyle()
     teacher = TeacherProfileModel.objects.get(user=request.user)
     rows = list(LoginDetails.objects.filter(teacher=teacher).values_list('enrollment_number', 'user', 'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
-    print("rows")
+
     
     for row in rows:
         row = list(row)
@@ -96,7 +96,7 @@ def export_users_xls(request):
                 #image 
                 path = LoginDetails.objects.filter(teacher=teacher)[row_num-1].processed_img.path
                 # path2 = os.path.abspath(path)
-                print(path)
+                
                 img = Image.open(path)
                 image_parts = img.split()
                 r = image_parts[0]
@@ -122,8 +122,7 @@ def change_whole_site_by_clicking(request):
     context = {}
     if request.method == 'POST':
         next_ = request.POST['next']
-        print('next')
-        print(next_)
+    
         if request.user.is_superuser or request.user in request.user.teacher_profile.all():
             teacher = request.user.teacher_profile.all().last()
 
@@ -242,7 +241,7 @@ def home_view(request):
                 'user':user,
                 'superuser':request.user.is_superuser
                 }
-                print(details)
+                # print(details)
             except:
                 details = None
             
@@ -256,7 +255,7 @@ def home_view(request):
                 user.login_proceed = login_proceed
                 
                 instance = LoginDetails.objects.create(user=request.user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user.enrollment_number)
-                print("connected")
+
                 instance.processed_img.save("output.jpg", image)
                 user.save()
                 
@@ -519,8 +518,7 @@ def login_with_face(request):
     context = {}
 
     if request.method == 'POST':
-        print("teacher:"+str(request.POST.get('teacher')))
-        print("lec:"+str(request.POST.get('lecture')))
+        
         try:
             user = UserProfile.objects.get(user=request.user)
              
