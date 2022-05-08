@@ -71,12 +71,12 @@ class UserProfile(models.Model):
     )
     
     SEMESTER_CHOICES = (
-        '1', '1st Semester',
-        '2', '2nd Semester',
-        '3', '3rd Semester',
-        '4', '4th Semester',
-        '5', '5th Semester',
-        '6', '6th Semester',
+        ('1', '1st Semester'),
+        ('2', '2nd Semester'),
+        ('3', '3rd Semester'),
+        ('4', '4th Semester'),
+        ('5', '5th Semester'),
+        ('6', '6th Semester'),
     )
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile', unique=True)
@@ -200,12 +200,12 @@ class LectrueModel(models.Model):
     )
     
     SEMESTER_CHOICES = (
-        '1', '1st Semester',
-        '2', '2nd Semester',
-        '3', '3rd Semester',
-        '4', '4th Semester',
-        '5', '5th Semester',
-        '6', '6th Semester',
+        ('1', '1st Semester'),
+        ('2', '2nd Semester'),
+        ('3', '3rd Semester'),
+        ('4', '4th Semester'),
+        ('5', '5th Semester'),
+        ('6', '6th Semester'),
     )
     
     lecture_name = models.CharField(default="", max_length=100)
