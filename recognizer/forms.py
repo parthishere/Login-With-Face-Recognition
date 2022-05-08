@@ -76,7 +76,6 @@ class LectureDetailsForm(forms.ModelForm):
         self.fields['lecture'].queryset = LectrueModel.objects.none()
         
         if 'teacher' in self.data:
-            print("in try block")
             try:
                 teacher_id = int(self.data.get('teacher'))
                 self.fields['lecture'].queryset = LectrueModel.objects.filter(teacher_id=teacher_id).order_by('-id')

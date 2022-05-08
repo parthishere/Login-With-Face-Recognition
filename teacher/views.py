@@ -17,7 +17,7 @@ def profile_view(request):
         context['user_profile'] = teacher.user.user_profile.all().first()
         change_site_count = teacher.change_website_objects.all().count()
         context['change_site_count'] = change_site_count
-        print(teacher.user.user_profile)
+        
         context['students_attended_teachers_lecture'] = LoginDetails.objects.filter(teacher__user=request.user).order_by('-login_date').order_by('-login_time')
     except:
         return redirect('recognizer:logout-cnf')
@@ -32,7 +32,7 @@ def profile_list_view(request):
         teacher = TeacherProfileModel.objects.get(user=request.user)
         context['teacher'] = teacher
         context['user_profile'] = teacher.user.user_profile.all().first()
-        print(teacher.user.user_profile)
+        
         students = UserProfile.objects.filter(college=teacher.college).filter(branch=teacher.branch)
         context['objects'] = students
         context['is_student'] = "Student"
@@ -48,7 +48,7 @@ def teacher_profile_list_view(request):
         teacher = TeacherProfileModel.objects.get(user=request.user)
         context['teacher'] = teacher
         context['user_profile'] = teacher.user.user_profile.all().first()
-        print(teacher.user.user_profile)
+       
         teachers = TeacherProfileModel.objects.filter(college=teacher.college).values('user')
         context['is_teacher'] = "Teacher"
         context['objects'] = teachers
@@ -115,7 +115,7 @@ def lecture_list_view(request):
         teacher = TeacherProfileModel.objects.get(user=request.user)
         context['teacher'] = teacher
         context['user_profile'] = teacher.user.user_profile.all().first()
-        print(teacher.user.user_profile)
+        
         lectures = LectrueModel.objects.filter(teacher=teacher)
         context['objects'] = lectures
 
