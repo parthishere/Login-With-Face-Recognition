@@ -30,7 +30,7 @@ def detectImage(frame, details):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.getcwd()
-    image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','User_images', details['college'], details['branch'], details['gender']))
+    image_dir = os.path.join(base_dir,"{}/{}/{}/{}".format('media','User_images', details['college'], details['branch'], details['gender']))
     print("image directory for recognizing"+str(image_dir))
     names = []
     proceed_login = False

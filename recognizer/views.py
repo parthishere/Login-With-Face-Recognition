@@ -220,6 +220,8 @@ def home_view(request):
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
             
+        if teacher_user.ip1 is None and teacher_user.ip2 is None:
+            pass
         
         lecture_object = LectrueModel.objects.get(id=lecture)
         try:
@@ -252,7 +254,8 @@ def home_view(request):
                 'username':user.user.username,
                 'unique_id':user.unique_id,
                 'user':user,
-                'superuser':request.user.is_superuser
+                'superuser':request.user.is_superuser,
+                'image':user.image,
                 }
                 print(details)
             except:
