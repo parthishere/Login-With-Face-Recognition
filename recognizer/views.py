@@ -335,13 +335,9 @@ def login_view(request):
                 context['form'] = login_form
                 
                 user_profile = UserProfile.objects.get(user=user)
-                if user.teacher_profile:
-                    if user_profile.image:
-                        return redirect('recognizer:home')
-                    else:
-                        return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
+
                     
-                if user_profile.image:
+                if user_profile.updated:
                     return redirect('recognizer:home')
                 else:
                     return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
@@ -361,7 +357,8 @@ def signup_view(request):
     }
     context['form'] = signup_form
     
-    if request.POST:
+    
+    if request.POST :
         if signup_form.is_valid():
             username = signup_form.cleaned_data.get('username')
             email = signup_form.cleaned_data.get('email')
