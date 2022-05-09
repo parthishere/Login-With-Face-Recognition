@@ -295,7 +295,9 @@ def home_view(request):
         else:
             print("Session hasn'e started")
             messages.error(request,f"Session hasn't started by {teacher_user.user.username}, Can't take attendance")
-            return HttpResponseRedirect(reverse('recognizer:home'))
+            url = reverse('recognizer:home')
+                
+            return JsonResponse(status = 302 , data = {'success' : url })
     
     return render(request, 'recognizer/home.html', context=context)
 
