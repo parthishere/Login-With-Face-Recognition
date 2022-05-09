@@ -91,6 +91,10 @@ def detectImage(frame, details):
 
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
+            print("valid !!")
+            print(names)
+            print(str(details['username']+details['unique_id']))
+            print(str(details['username']+details['unique_id']) in names)
             if str(details['username']+details['unique_id']) in names or details['superuser']:
                 proceed_login = True
             else:
@@ -100,6 +104,3 @@ def detectImage(frame, details):
     
     return frame, proceed_login, names, known_face_names
 
-
-
-# def detectImageForSuperUser(frame, details):
