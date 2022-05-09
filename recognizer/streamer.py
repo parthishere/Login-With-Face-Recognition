@@ -22,7 +22,7 @@ import face_recognition
 
 
 def detectImage(frame, details):
-    
+    print(details['image'].path)
     print("start")
     
     known_face_encodings = []
