@@ -22,7 +22,7 @@ class LoginDetails(models.Model):
     authenticated_user = models.BooleanField(default=False) 
     teacher = models.ForeignKey("recognizer.TeacherProfileModel", on_delete=models.CASCADE, null=True, blank=True, related_name='login_details_with_teacher')
     lecture = models.ForeignKey(LectrueModel, on_delete=models.CASCADE, null=True, blank=True)
-    enrollment_number = models.IntegerField(default=0)
+    enrollment_number = models.BigIntegerField(null=True, blank=True)
     processed_img = models.ImageField(upload_to=processed_image_path, null=True, blank=True)
     
     def __str__(self):

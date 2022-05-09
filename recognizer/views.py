@@ -222,11 +222,16 @@ def home_view(request):
             
         
         lecture_object = LectrueModel.objects.get(id=lecture)
-        o = teacher_user.change_website_objects.all().count()
+        try:
+            o = teacher_user.change_website_objects.all().count()
+            c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user).order_by('id').last()
+            context['recognize'] = c.recognize
+        except:
+            o = 0
+            context['recognize'] = False
         if o == 0:
             print("no objects")
-        c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user).order_by('id').last()
-        context['recognize'] = c.recognize
+        
         
         if not user_ip in allowed_ips:
             print("HTTP_X_FORWARDED_FOR is not in allowed_ip")
