@@ -375,7 +375,7 @@ def signup_view(request):
                 context['form'] = signup_form
                 messages.success(request, "Sign up Sucsessful")
                 
-                user_profile = user.user_profile
+                user_profile = UserProfile.objects.get(user=user)
                 # uqid = get_uqid(request=request)
                 # request.session['uqid'] = uqid
                 return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
