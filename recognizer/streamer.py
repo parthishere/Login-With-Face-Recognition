@@ -70,7 +70,6 @@ def detectImage(frame, details):
                 face_names.append(name)
                 if name not in names:
                     names.append(name)
-                    print("recognized names array:"+names)
         except Exception as e:
             print("Some exception happned while comparing faces")
             print(e)
@@ -92,7 +91,7 @@ def detectImage(frame, details):
 
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left, top), font, 0.8, (255,255,255),1)
-            if str(details['username']+details['unique_id']) in name or details['superuser']:
+            if str(details['username']+details['unique_id']) in names or details['superuser']:
                 proceed_login = True
             else:
                 proceed_login = False
