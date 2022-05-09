@@ -92,21 +92,20 @@ WSGI_APPLICATION = 'login_with_face.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-# postgres://ldoluyxlxienfb:3068161ee25de3afa6017b522c4d4284be16a0bb0c5eee9230cfc8617f14f834@ec2-54-163-97-228.compute-1.amazonaws.com:5432/d69vo93g46cl7d
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'd69vo93g46cl7d',
-    #     'HOST': 'ec2-54-163-97-228.compute-1.amazonaws.com',
-    #     'PORT': 5432,
-    #     'USER': 'ldoluyxlxienfb',
-    #     'PASSWORD': '3068161ee25de3afa6017b522c4d4284be16a0bb0c5eee9230cfc8617f14f834',
-    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ['DATABASE_NAME'],
+        'HOST': os.environ['DATABASE_HOST'],
+        'PORT': 5432,
+        'USER': os.ennviron['DATABASE_USER'],
+        'PASSWORD': os.environ['DATABASE_PASSWORD'],
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    # }
 
 }
 
@@ -164,5 +163,3 @@ LOGOUT_REDIRECT_URL = '/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-
-

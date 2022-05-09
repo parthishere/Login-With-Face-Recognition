@@ -13,7 +13,7 @@ def base64_encode(data):
 def get_face_detect_data(file, details):
     img = cv2.imdecode(np.fromstring(file, np.uint8), cv2.IMREAD_UNCHANGED)
     image_data, proceed_login, names, known_face_names = detectImage(img, details)
-
+    print(f"Recognized Face name {str(names)}, Known face name from image directory {str(known_face_names)}" )
     return image_data, proceed_login, names, known_face_names
 
 
@@ -31,7 +31,7 @@ def detectImage(frame, details):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.getcwd()
     image_dir = os.path.join(base_dir,"{}\{}\{}\{}".format('media','User_images', details['college'], details['branch'], details['gender']))
-
+    print("image directory for recognizing"+str(image_dir))
     names = []
     proceed_login = False
 
@@ -50,7 +50,7 @@ def detectImage(frame, details):
     face_locations = []
     face_encodings = []
 
-    # print(known_face_names)
+    print("Fnown face names from files in image dir"+str(known_face_names))
 
     face_locations = face_recognition.face_locations(frame)
     face_encodings = face_recognition.face_encodings(frame, face_locations)
@@ -70,8 +70,10 @@ def detectImage(frame, details):
                 face_names.append(name)
                 if name not in names:
                     names.append(name)
-                    # print("name array:"+names)
-        except:
+                    print("recognized names array:"+names)
+        except Exception as e:
+            print("Some exception happned while comparing faces")
+            print(e)
             pass
 
     if len(face_names) == 0:

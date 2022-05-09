@@ -151,10 +151,11 @@ from .streamer import get_face_detect_data
 # @allow_by_ip
 @login_required(login_url='recognizer:login')
 def home_view(request):
-    
+    user_ip = request.META['HTTP_X_FORWARDED_FOR']
     context = {}
     context['change_site_count'] = 0
     context['recognize'] = False
+    context['user_ip'] = user_ip
     
     try:
         teacher = request.user.teacher_profile.all().last()
@@ -201,9 +202,9 @@ def home_view(request):
             teacher_user.ip1 = ip1
             teacher_user.save()
             
-        user_ip = request.META['HTTP_X_FORWARDED_FOR']
-        context['user_ip'] = user_ip
-
+        
+        print("user ip (HTTP_X_FORWARDED_FOR): "+ user_ip)
+        print('user ip (REMOTE_ADDR): '+ request.META['REMOTE_ADDR'])
         if teacher_user.ip1:
             allowed_ips = []
             allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:3])
@@ -218,9 +219,6 @@ def home_view(request):
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
             
         
-        print("\n\n\n\n\n\n\n\n user ip \n\n\n\n\n\n\n\n")
-        print(user_ip)
-        print("\n\n\n")
         lecture_object = LectrueModel.objects.get(id=lecture)
         o = teacher_user.change_website_objects.all().count()
         if o == 0:
@@ -229,6 +227,7 @@ def home_view(request):
         context['recognize'] = c.recognize
         
         if not user_ip in allowed_ips:
+            print("HTTP_X_FORWARDED_FOR is not in allowed_ip")
             messages.error(request,"Your IP is not in same subnet IPs")
             url = reverse('recognizer:home')
             return JsonResponse(status = 302 , data = {'success' : url })
@@ -248,7 +247,7 @@ def home_view(request):
                 'user':user,
                 'superuser':request.user.is_superuser
                 }
-                # print(details)
+                print(details)
             except:
                 details = None
             
@@ -273,6 +272,7 @@ def home_view(request):
                 
                 return JsonResponse(status = 302 , data = {'success' : url })
             else:
+                print("Face not recognized")
                 context['login_detail'] = False
                 user.login_proceed = login_proceed
                 user.save()
@@ -283,6 +283,7 @@ def home_view(request):
                 url = reverse('recognizer:home')
                 return JsonResponse(status = 302 , data = {'success' : url })
         else:
+            print("Session hasn'e started")
             messages.error(request,f"Session hasn't started by {teacher_user.user.username}, Can't take attendance")
             return HttpResponseRedirect(reverse('recognizer:home'))
     
