@@ -17,7 +17,7 @@
     {% csrf_token %}
     {{ form.as_p }}
     <input type="hidden" name="next" value="{{ request.GET.next }}"/>
-    <input type='submit'>
+    <input type='submit' class='btn btn-dark'>
 </form>
 </div>
 

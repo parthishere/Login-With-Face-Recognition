@@ -197,7 +197,7 @@
           {% else %}{% endif %}
 
           {% if request.user.is_superuser %}
-          <a href="{% url 'recognizer:del-profile' object.pk %}"><button type="button" class="btn btn-warning">Delete Profile</button></a>
+          <a href="{% url 'recognizer:del-profile' object.pk %}"><button type="button" class="btn btn-danger">Delete Profile</button></a>
           {% else %}{% endif %}
           </center>
           </br>

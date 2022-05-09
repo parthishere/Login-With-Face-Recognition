@@ -379,7 +379,7 @@ def signup_view(request):
                 
                 user_profile = UserProfile.objects.get(user=user)
                 # uqid = get_uqid(request=request)
-                # request.session['uqid'] = uqid
+                request.session['user_pk'] = user_profile.pk
                 print(user_profile)
                 return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
