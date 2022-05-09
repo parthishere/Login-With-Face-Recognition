@@ -368,7 +368,7 @@ def signup_view(request):
             if user is None:
                 user = User.objects.create(username=username, email=email, password=password)
                 # user.set_password(password)
-                user.save()
+                # user.save()
                 login(request, user=user)
                 
                 signup_form = AuthenticationForm(request.POST or None)
@@ -378,6 +378,7 @@ def signup_view(request):
                 user_profile = UserProfile.objects.get(user=user)
                 # uqid = get_uqid(request=request)
                 # request.session['uqid'] = uqid
+                print(user_profile)
                 return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
                 messages.error(request, 'User already exists!')
@@ -490,7 +491,19 @@ def update_profile_image_view(request, pk=None):
     return render(request, 'recognizer/profile_form.html', context=context)
 
 
-
+@user_passes_test(lambda u: u.is_superuser)
+def delete_profile(request, pk=None):
+    try:   
+        user_profile = UserProfile.objects.get(pk=pk)
+        user = user_profile.user
+    except:
+        return reverse("recognizer:home")
+    
+    if request.user.is_superuser:
+        user_profile.delete()
+        user.delete()
+        
+    return reverse("recognizer:home")
 
 
 @login_required(login_url='recognizer:login')

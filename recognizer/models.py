@@ -87,7 +87,7 @@ class UserProfile(models.Model):
     college = models.CharField(choices=COLLEGE_CHOICES, max_length=5)
     company = models.CharField(max_length=100,null=True, blank=True)
     branch = models.CharField(choices=BRANCH_CHOICES,max_length=3)
-    semester = models.CharField(choices=SEMESTER_CHOICES, max_length=1, default='1')
+    semester = models.CharField(choices=SEMESTER_CHOICES, max_length=3, default='1')
     enrollment_number = models.BigIntegerField(null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     phone_number = models.BigIntegerField(null=True, blank=True)
@@ -115,6 +115,10 @@ class UserProfile(models.Model):
     @property
     def get_absolute_url(self):
         return reverse("recognizer:profile", kwargs={"pk": self.pk})
+    
+    @property
+    def get_delete_url(self):
+        return reverse("recognizer:del-profile", kwargs={"pk": self.pk})
     
     
     
@@ -210,11 +214,20 @@ class LectrueModel(models.Model):
     
     lecture_name = models.CharField(default="", max_length=100)
     teacher = models.ForeignKey(TeacherProfileModel, blank=True, null=True, related_name='lectures', on_delete=models.CASCADE)
-    semester = models.CharField(SEMESTER_CHOICES, default='1', max_length=1)
+    semester = models.CharField(choices=SEMESTER_CHOICES, default='1', max_length=1)
     branch = models.CharField(choices=BRANCH_CHOICES, null=True, blank=True, max_length=5)
        
     def __str__(self):
         return self.lecture_name
+    
+    @property
+    def get_absolute_url(self):
+        return reverse("teacher:lec-detail", kwargs={"pk": self.pk})
+    
+    @property
+    def get_delete_url(self):
+        return reverse("teacher:lec-delete", kwargs={"pk": self.pk})
+    
     
 class ChangeWebsiteCount(models.Model):
     recognize = models.BooleanField(default=True)

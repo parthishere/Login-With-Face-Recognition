@@ -196,7 +196,9 @@
           <a href="{% url 'recognizer:update-img-profile' object.pk %}"><button type="button" class="btn btn-primary">Update Image</button></a>
           {% else %}{% endif %}
 
-          
+          {% if request.user.is_superuser %}
+          <a href="{% url 'recognizer:del-profile' object.pk %}"><button type="button" class="btn btn-warning">Delete Profile</button></a>
+          {% else %}{% endif %}
           </center>
           </br>
           <br>

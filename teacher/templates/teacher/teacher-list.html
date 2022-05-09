@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block body_block %}
+
 {% for message in messages %}
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
   {{ message }}
@@ -10,17 +11,18 @@
 </div>
 {% endfor %}
 
-<br>
+
+{% if is_student %}
 <center>
-    <b><h4> Lectures List by {{ teacher.user.username | upper }}</b></h4>
-    {{ teacher.username }}
-{{ teacher.college }}
-{{ teacher.branch }}
+<b><h4> Student List</b></h4>
+</center>
+{% else %}
+<center>
+    <b><h4> Teachers List</b></h4>
     </center>
-    <br>
+{% endif %}
 
 <hr>
-<br>
 {% for object in objects %}
 <center>
 <div class="col-md-8">
@@ -31,12 +33,10 @@
         <div class="row">
             
           <div class="col-sm-3">
-            <h6 class="mb-0">Lecture</h6>
+            <h6 class="mb-0">{{ is_student }}{{ is_teacher }}</h6>
           </div>
           <div class="col-sm-9 text-secondary">
-            {{ object.lecture_name }} of Branch: {{ object.branch }}, Semester: {{ object.semester }} </a> &nbsp
-            <a "padding-left:30px;" href="{% url 'teacher:lec-update' pk=object.pk %}">Update</a>
-            <a style="float:right;" href={{ object.get_delete_url }}><b><font color='red'> X </font></b></a>
+            <a href={{ object.get_absolute_url }}>{{ object }}  </a>
           </div>
         </div>
     </div>
@@ -45,6 +45,7 @@
         <hr>
 
 {% endfor %}
+        
 
 
 {% endblock %}

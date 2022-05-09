@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.db import models
 
 from recognizer.models import UserProfile, TeacherProfileModel, LectrueModel
@@ -16,7 +17,7 @@ def processed_image_path(instance, filename):
 
 # Create your models here.
 class LoginDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User,related_name='attandence', on_delete=models.CASCADE)
     login_date = models.DateField(auto_now_add=True)
     login_time = models.TimeField(auto_now_add=True)
     authenticated_user = models.BooleanField(default=False) 
@@ -34,3 +35,7 @@ class LoginDetails(models.Model):
     class Meta():
         ordering = ['-id']
         verbose_name = 'Login Detail'
+        
+        
+    def get_delete_url(self):
+        return reverse('teacher:del-att', kwargs={'pk':self.pk})

@@ -251,6 +251,7 @@
                     <th>{{ obj.teacher }}</th>
                     <th>{{ obj.lecture }}</th>
                     <th><img src={{obj.processed_img.url}} style="width:230px; height:100px;"></th>
+                    <th> <a style="float:right;" href={{ obj.get_delete_url }}><b><font color='red'> X </font></b></a> </th>
                   </tr>
                   {% endfor %}
                 </tfoot>
@@ -279,7 +280,7 @@
       <!-- Sticky Footer -->
       <footer class="footer text-center sticky-footer">
         <div class="container">
-            <small class="copyright">Copyright @ <a class='no-blue' href="https://stormy-hemlet.herokuapp.com">Thakkar Parth </a></small>
+            <small class="copyright">Copyright @ <a class='no-blue' href="https://stormy-hamlet-70851.herokuapp.com/">Thakkar Parth </a></small>
         </div><!--//container-->
     </footer> 
 

@@ -56,7 +56,7 @@ def teacher_profile_list_view(request):
         print(e)
         return redirect('recognizer:logout-cnf')
     
-    return render(request, 'teacher/students-list.html', context=context)
+    return render(request, 'teacher/teacher-list.html', context=context)
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -127,6 +127,8 @@ def lecture_list_view(request):
 
 def lec_detail_view(request, pk=None):
     context = {}
+    lecture = LectrueModel.objects.get(pk=pk)
+    context['lecture'] = lecture
     return render(request, 'teacher/lectures-detail.html', context=context) 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -136,13 +138,47 @@ def add_lecture(request):
     context['form'] = form
     if request.POST and form.is_valid:
         teacher = TeacherProfileModel.objects.get(user=request.user)
-        instance = form.save(teacher=teacher)
+        instance = form.save()
+        instance.teacher = teacher
+        instance.save()
         context['form'] = form
         messages.success(request, "Lecture Added Succsessfully")
         return redirect('teacher:lec')
     
     return render(request, 'teacher/update-teacher-profile.html', context=context)
 
-
+@user_passes_test(lambda u: u.is_superuser)
 def search_student(request):
-    pass
+    return (request, "", {})
+
+@user_passes_test(lambda u: u.is_superuser)
+def search_lectures(request):
+    return (request, "", {})
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_lecture(request, pk=None):
+    lecture = LectrueModel.objects.get(pk=pk)
+    if request.user == lecture.teacher.user:
+        lecture.delete()
+    return redirect('teacher:lec')
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_attendance(request, pk=None):
+    att = LoginDetails.objects.get(pk=pk)
+    if att.teacher.user == request.user:
+        print('ok')
+        att.delete()
+    return redirect('teacher:dashboard')
+
+@user_passes_test(lambda u: u.is_superuser)
+def update_lecture(request, pk=None):
+    context = {}
+    lec = LectrueModel.objects.get(pk=pk)
+    form = LectureForm(request.POST or None, instance=lec)
+    context['form'] = form
+    print(lec.teacher.user)
+    if lec.teacher.user == request.user and form.is_valid():
+        instance = form.save()
+        messages.success(request, "Lecture Updated Succsessfully")
+        return redirect("teacher:lec")
+    return render(request, 'teacher/update-teacher-profile.html',context)

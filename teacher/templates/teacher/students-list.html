@@ -2,6 +2,15 @@
 
 {% block body_block %}
 
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+
 
 {% if is_student %}
 <center>
@@ -27,7 +36,7 @@
             <h6 class="mb-0">{{ is_student }}{{ is_teacher }}</h6>
           </div>
           <div class="col-sm-9 text-secondary">
-            <a href={{ object.get_absolute_url }}>{{ object }}</a>
+            <a href={{ object.get_absolute_url }}>{{ object }} </a><a style="float:right;" href={{ object.get_delete_url }}><b><font color='red'> X </font></b></a>
           </div>
         </div>
     </div>
