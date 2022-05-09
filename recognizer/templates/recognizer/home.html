@@ -9,7 +9,8 @@
 
 {% block body_block %}
 
-{{ user_ip }}
+HTTP_X_FORWARDED_FOR : {{ user_ip }}
+REMOTE_ADDR : {{ second_user_ip }}
 
 <spacer type="vertical" width="1000" height="1000">  </spacer>
 <div class='container-fluid'>

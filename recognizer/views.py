@@ -152,10 +152,12 @@ from .streamer import get_face_detect_data
 @login_required(login_url='recognizer:login')
 def home_view(request):
     user_ip = request.META['HTTP_X_FORWARDED_FOR']
+    second_user_ip = request.META['REMOTE_ADDR']
     context = {}
     context['change_site_count'] = 0
     context['recognize'] = False
     context['user_ip'] = user_ip
+    context['second_user_ip'] = second_user_ip
     
     try:
         teacher = request.user.teacher_profile.all().last()
