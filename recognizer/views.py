@@ -279,7 +279,6 @@ def home_view(request):
                 user.login_proceed = login_proceed
                 
                 instance = LoginDetails.objects.create(user=request.user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user.enrollment_number)
-                instance.bit64_image = base64.b64encode(image)
                 instance.processed_img.save("output.jpg", image)
                 
                 user.save()
@@ -490,8 +489,6 @@ def update_profile_view(request, pk=None):
             if edit_form.is_valid():
                 user = edit_form.save()
                 img = edit_form.cleaned_data.get('image')
-                if img:
-                    user.bit64_image = base64.b64encode(img)
                 instance.updated = True
                 instance.save()
                 
@@ -528,10 +525,6 @@ def update_profile_image_view(request, pk=None):
                 img = request.FILES.get('image')
                 user = edit_form.save()
                 instance.image = img
-                try:
-                    instance.bit64_image = base64.b64encode(img)
-                except:
-                    print("Somthing went wrong")
                 instance.save()
                 
                 messages.success(request, "Profile Image Edited Sucsessfuly")
