@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'storages',
     'recognizer',
     'login_details',
     'teacher',
@@ -143,6 +144,24 @@ USE_L10N = True
 USE_TZ = True
 
 
+AMAZON_ACCESS_KEY_ID = os.environ['AMAZON_ACCESS_KEY_ID']
+AMAZON_SECRET_ACCESS_KEY = os.environ['AMAZON_SECRET_ACCESS_KEY']
+AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_OBJCET_PARAMETERS = {
+    'CacheControl': 'max-age=86400'
+}
+AWS_LOCATION = 'static'
+AWS_QUERYSTRING_AUTH = False
+AWS_HEADERS = {
+    "Access-Control-Allow-Origin": "*", 
+}
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
@@ -153,7 +172,6 @@ STATICFILES_DIRS = (
     STATIC_DIR,
 )
 
-MEDIA_URL = '/media/'
 MEDIA_ROOT = MEDIA_DIR
 
 

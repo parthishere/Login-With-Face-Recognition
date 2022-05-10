@@ -42,3 +42,5 @@ urllib3==1.26.4
 python-dev-tools
 python-dotenv==0.19.2
 plotly
+django-storages
+boto3
