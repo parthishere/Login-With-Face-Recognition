@@ -23,7 +23,7 @@ class LoginDetails(models.Model):
     authenticated_user = models.BooleanField(default=False) 
     teacher = models.ForeignKey(TeacherProfileModel, on_delete=models.CASCADE, related_name='login_details_with_teacher', null=True, blank=True)
     lecture = models.ForeignKey(LectrueModel, on_delete=models.CASCADE, null=True, blank=True)
-    enrollment_number = models.BigIntegerField(default=190280111140)
+    enrollment_number = models.BigIntegerField(null=True, blank=True)
     processed_img = models.ImageField(upload_to=processed_image_path, null=True, blank=True)
     bit64_image = models.TextField(null=True, blank=True)
       
