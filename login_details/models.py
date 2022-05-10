@@ -21,16 +21,17 @@ class LoginDetails(models.Model):
     login_date = models.DateField(auto_now_add=True)
     login_time = models.TimeField(auto_now_add=True)
     authenticated_user = models.BooleanField(default=False) 
-    teacher = models.ForeignKey(TeacherProfileModel, on_delete=models.CASCADE, null=True, blank=True, related_name='login_details_with_teacher')
+    teacher = models.ForeignKey(TeacherProfileModel, on_delete=models.CASCADE, related_name='login_details_with_teacher', null=True, blank=True)
     lecture = models.ForeignKey(LectrueModel, on_delete=models.CASCADE, null=True, blank=True)
-    enrollment_number = models.BigIntegerField(null=True, blank=True)
+    enrollment_number = models.BigIntegerField(default=190280111140)
     processed_img = models.ImageField(upload_to=processed_image_path, null=True, blank=True)
-    
+    bit64_image = models.TextField(null=True, blank=True)
+      
     def __str__(self):
         login_date = str(self.login_date)
         login_time = str(self.login_time)
         user = str(self.user)
-        return (user +'   '+ login_date +'  Time:  '+ login_time)
+        return (user +'   '+ login_date +'  Time:  '+ login_time +" Lecture: "+ self.lecture.lecture_name)
     
     class Meta():
         ordering = ['-id']

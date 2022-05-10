@@ -32,7 +32,7 @@ if os.path.isfile(dotenv_file):
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['facelogup.herokuapp.com', '127.0.0.1', '192.168.0.101']
 
@@ -144,19 +144,17 @@ USE_L10N = True
 USE_TZ = True
 
 
-AMAZON_ACCESS_KEY_ID = os.environ['AMAZON_ACCESS_KEY_ID']
-AMAZON_SECRET_ACCESS_KEY = os.environ['AMAZON_SECRET_ACCESS_KEY']
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 AWS_DEFAULT_ACL = 'public-read'
-AWS_S3_OBJCET_PARAMETERS = {
+AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400'
 }
-AWS_LOCATION = 'static'
+AWS_LOCATION = 'media'
 AWS_QUERYSTRING_AUTH = False
-AWS_HEADERS = {
-    "Access-Control-Allow-Origin": "*", 
-}
+AWS_HEADERS = {'Access-Control-Allow-Origin': '*'}
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'

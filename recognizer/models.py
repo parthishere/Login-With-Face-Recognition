@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 
 from login_with_face.settings import BASE_DIR
-
+from teacher.models import DistrictCollege, CityCollegeModel, CollegeModel, CollegeBranchModel
 import os
 
 from .utils import random_string_generator
@@ -82,11 +82,16 @@ class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile', unique=True)
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
+    bit64_image = models.TextField(null=True, blank=True)
     about = models.CharField(max_length=30, null=True, blank=True)
     gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
-    college = models.CharField(choices=COLLEGE_CHOICES, max_length=5)
+    district = models.ForeignKey(DistrictCollege, on_delete=models.CASCADE, null=True, blank=True)
+    city = models.ForeignKey(CityCollegeModel, on_delete=models.CASCADE, null=True, blank=True)
+    # college = models.ForeignKey(CollegeModel, on_delete=models.CASCADE, null=True, blank=True)
+    # branch = models.ForeignKey(CollegeBranchModel, on_delete=models.CASCADE, null=True, blank=True)
+    college = models.CharField(choices=COLLEGE_CHOICES, max_length=5, null=True, blank=True)
     company = models.CharField(max_length=100,null=True, blank=True)
-    branch = models.CharField(choices=BRANCH_CHOICES,max_length=3)
+    branch = models.CharField(choices=BRANCH_CHOICES,max_length=3, null=True, blank=True)
     semester = models.CharField(choices=SEMESTER_CHOICES, max_length=3, default='1')
     enrollment_number = models.BigIntegerField(null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -172,7 +177,7 @@ class TeacherProfileModel(models.Model):
 
     about = models.CharField(max_length=30, null=True, blank=True)
 
-    college = models.CharField(choices=COLLEGE_CHOICES, max_length=5, blank=True, null=True)
+    college = models.CharField(choices=COLLEGE_CHOICES, max_length=5 ,null=True, blank=True)
     company = models.CharField(max_length=100,null=True, blank=True)
     branch = models.CharField(choices=BRANCH_CHOICES,max_length=3, blank=True, null=True)
     login_proceed = models.BooleanField(default=True)
@@ -181,13 +186,17 @@ class TeacherProfileModel(models.Model):
     def __str__(self):
         name = self.user.username + str(self.pk)
         return "{} {}".format(self.user.username, self.pk)
+ 
+ 
+import base64
     
 def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
     try:
         obj = TeacherProfileModel.objects.get(user=instance)
     except:
         obj = None
-
+    if instance.image:
+        instance.bit64_image = base64.b64encode(instance.image)
     if instance.is_superuser and obj is None:
         obj = TeacherProfileModel.objects.create(user=instance)
 
@@ -220,6 +229,9 @@ class LectrueModel(models.Model):
     def __str__(self):
         return self.lecture_name
     
+    class Meta():
+        unique_together = ('teacher', 'lecture_name')
+        
     @property
     def get_absolute_url(self):
         return reverse("teacher:lec-detail", kwargs={"pk": self.pk})

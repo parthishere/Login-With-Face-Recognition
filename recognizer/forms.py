@@ -60,6 +60,9 @@ class UserProfileImageForm(forms.ModelForm):
     
             
 class LectureDetailsForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(queryset=TeacherProfileModel.objects.all(), required=True)
+    lecture = forms.ModelChoiceField(queryset=LectrueModel.objects.all(), required=True)
+    
     class Meta():
         model = LoginDetails
         fields = ['teacher', 'lecture']

@@ -118,11 +118,13 @@ def export_users_xls(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def change_whole_site_by_clicking(request):
-    
+    next_ = "recognizer:home"
     context = {}
     if request.method == 'POST':
-        next_ = request.POST['next']
-    
+        try:
+            next_ = request.POST['next']
+        except:
+            next_ = "recognizer:home"
         if request.user.is_superuser or request.user in request.user.teacher_profile.all():
             teacher = request.user.teacher_profile.all().last()
 
@@ -134,9 +136,11 @@ def change_whole_site_by_clicking(request):
                 c = ChangeWebsiteCount.objects.create(teacher=teacher)
                 change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
                 context['recognize'] = c.recognize
+                
             if next:
                 return redirect(next_)
-            return redirect('recognizer:home')
+            else:
+                return redirect('recognizer:home')
         else:
             return redirect('recongizer:home')
     return render(request, 'recognizer/home.html', context=context)
@@ -151,7 +155,10 @@ from .streamer import get_face_detect_data
 # @allow_by_ip
 @login_required(login_url='recognizer:login')
 def home_view(request):
-    user_ip = request.META['HTTP_X_FORWARDED_FOR']
+    try:
+        user_ip = request.META['HTTP_X_FORWARDED_FOR']
+    except:
+        user_ip = request.META['REMOTE_ADDR']
     second_user_ip = request.META['REMOTE_ADDR']
     context = {}
     context['change_site_count'] = 0
@@ -256,23 +263,25 @@ def home_view(request):
                 'user':user,
                 'superuser':request.user.is_superuser,
                 'image':user.image,
+                'base64_image':user.bit64_image,
                 }
                 print(details)
-            except:
+            except Exception as e:
+                print(e)
                 details = None
             
             frame, login_proceed, names, known_face_names = get_face_detect_data(file, details)
             ret, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
-            
-
+            print(login_proceed, names, known_face_names)
             if login_proceed:
                 context['login_detail'] = True
                 user.login_proceed = login_proceed
                 
                 instance = LoginDetails.objects.create(user=request.user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user.enrollment_number)
-
+                instance.bit64_image = base64.b64encode(image)
                 instance.processed_img.save("output.jpg", image)
+                
                 user.save()
                 
                 context['login_details_form'] = login_details_form
@@ -459,6 +468,9 @@ def lecture_details(request, pk=None):
 
     return render(request, "recognizer/lectures-details.html", context)
 
+
+import base64
+
 @login_required(login_url='recognizer:login')
 def update_profile_view(request, pk=None):
     edit_form = None
@@ -477,6 +489,9 @@ def update_profile_view(request, pk=None):
         if request.POST:
             if edit_form.is_valid:
                 user = edit_form.save()
+                img = edit_form.cleaned_data.get('image')
+                if img:
+                    user.bit64_image = base64.b64encode(img)
                 instance.updated = True
                 instance.save()
                 
@@ -512,6 +527,10 @@ def update_profile_image_view(request, pk=None):
                 img = request.FILES.get('image')
                 user = edit_form.save()
                 instance.image = img
+                try:
+                    instance.bit64_image = base64.b64encode(img)
+                except:
+                    print("Somthing went wrong")
                 instance.save()
                 
                 messages.success(request, "Profile Image Edited Sucsessfuly")
