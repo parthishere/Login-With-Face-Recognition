@@ -479,21 +479,22 @@ def update_profile_view(request, pk=None):
     except:
         instance = None
     if not instance.updated or instance.user.is_superuser:
-        edit_form = FirstTimeUserProfileForm(request.POST or None, instance=instance)
+        edit_form = FirstTimeUserProfileForm(request.POST, request.FILES, instance=instance)
     else:
-        edit_form = SecondTimeUserProfileForm(request.POST or None, instance=instance)
+        edit_form = SecondTimeUserProfileForm(request.POST, request.FILES, instance=instance)
     context = {
             'form':edit_form,
         }
     if instance.user == request.user or request.user.is_superuser:
         if request.POST:
-            if edit_form.is_valid:
+            if edit_form.is_valid():
                 user = edit_form.save()
                 img = edit_form.cleaned_data.get('image')
                 if img:
                     user.bit64_image = base64.b64encode(img)
                 instance.updated = True
                 instance.save()
+                
                 
                 messages.success(request, "Profile Edited Sucsessfuly")
                 request.session['uqid'] = user.unique_id
@@ -517,13 +518,13 @@ def update_profile_image_view(request, pk=None):
         instance = UserProfile.objects.get(pk=pk)
     except:
         instance = None
-    edit_form = UserProfileImageForm(request.POST or None, instance=instance)
+    edit_form = UserProfileImageForm(request.POST, request.FILES, instance=instance)
     context = {
             'form':edit_form,
         }
     if instance.user == request.user or request.user.is_superuser:
         if request.POST:
-            if edit_form.is_valid:
+            if edit_form.is_valid():
                 img = request.FILES.get('image')
                 user = edit_form.save()
                 instance.image = img
