@@ -38,7 +38,7 @@
           
                       <p class="text font-size-sm">{{ object.about }}</p>
                       {% comment %} <button class="btn btn-primary">Follow</button> {% endcomment %}
-                      <button class="btn btn-outline-primary">Message</button> <- under constuction
+                      <a href="{% url "recognizer:stud-lectures" pk=object.pk %}"><button class="btn btn-outline-primary">See Attandance Details</button> </a>
                     </div>
                   </div>
                 </div>
@@ -152,7 +152,7 @@
 
                       <ul class="list-group">
                       {% for login in login_object %}
-                        <li class="list-group-item">{{ login.login_date }} |  {{ login.login_time }}</li>
+                        <li class="list-group-item">Lecture {{ login.lecture}} by {{login.teacher}} on {{ login.login_date }} |  {{ login.login_time }}</li>
                       </ul>
                       {% endfor %}
 

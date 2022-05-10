@@ -22,6 +22,7 @@ from .views import (
     update_profile_image_view,
     succsess,
     delete_profile,
+    lecture_details,
 )
 
 app_name = 'recognizer'
@@ -41,6 +42,7 @@ urlpatterns = [
     path('change-website', change_whole_site_by_clicking, name='change-website'),
     path('export-attendance', export_users_xls, name='export'),
     path("succsess/", succsess, name="sus"),
+    path('profile/<int:pk>/attended-lectures', lecture_details, name="stud-lectures"),
     # path('facecam-feed', facecam_feed, name='feed_stream'),
     # path('redirect-face', just_a_function, name='redirect_stream'),
     

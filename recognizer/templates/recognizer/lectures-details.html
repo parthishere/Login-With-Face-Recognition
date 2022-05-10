@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block body_block%}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<div class='container-fluid'>
+    {% for lec, time in lectures_name %}
+    {{ lec }} : {{ time }} lecture/s attended
+    <br>
+    {% endfor %}
+    </div>
+
+<div class='container-fluid'>
+{% autoescape off %}
+{{ plot_div }}
+{% endautoescape %}
+<div>
+<hr>
+<br>
+
+
+
+{% endblock %}

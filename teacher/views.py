@@ -6,6 +6,7 @@ from recognizer.models import User, UserProfile, TeacherProfileModel, LectrueMod
 from login_details.models import LoginDetails
 from recognizer.views import login_view
 from .forms import IpAddress, TeacherUpdateForm, LectureForm
+from django.db.models import Q
 
 # Create your views here.
 @user_passes_test(lambda u: u.is_superuser)
@@ -33,7 +34,8 @@ def profile_list_view(request):
         context['teacher'] = teacher
         context['user_profile'] = teacher.user.user_profile.all().first()
         
-        students = UserProfile.objects.filter(college=teacher.college).filter(branch=teacher.branch)
+        teachers_user_profiles = TeacherProfileModel.objects.all().values('user')
+        students = UserProfile.objects.filter(college=teacher.college, branch=teacher.branch).exclude(user__is_superuser=True)
         context['objects'] = students
         context['is_student'] = "Student"
     except:
@@ -129,7 +131,7 @@ def lec_detail_view(request, pk=None):
     context = {}
     lecture = LectrueModel.objects.get(pk=pk)
     context['lecture'] = lecture
-    return render(request, 'teacher/lectures-detail.html', context=context) 
+    return render(request, 'teacher/lectures_detail.html', context=context) 
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_lecture(request):
@@ -147,12 +149,25 @@ def add_lecture(request):
     
     return render(request, 'teacher/update-teacher-profile.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser)
+
 def search_student(request):
-    return (request, "", {})
+    context = {}
+    query = request.GET['q']
+    qs = UserProfile.objects.filter(
+                Q(user__username__icontains=query) |
+                Q(user__first_name__icontains=query) |
+                Q(user__last_name__icontains=query) |
+                Q(user__email__icontains=query) |
+                Q(enrollment_number__icontains=query) |
+                Q(phone_number__icontains=query)
+            ).exclude(user__is_superuser=True)
+    context['is_student'] = "Student"
+    context['objects'] = qs
+    return render(request, "teacher/students-list.html", context)
 
 @user_passes_test(lambda u: u.is_superuser)
 def search_lectures(request):
+    query = request.GET.get('q')
     return (request, "", {})
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -182,3 +197,29 @@ def update_lecture(request, pk=None):
         messages.success(request, "Lecture Updated Succsessfully")
         return redirect("teacher:lec")
     return render(request, 'teacher/update-teacher-profile.html',context)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def reset_confirm_view(request, pk=None):
+    context = {}
+    lecture = LectrueModel.objects.get(pk=pk)
+    context['view'] = 'Reset Lecture'
+    context['msg'] = f"Reset Lecture {lecture.lecture_name}??"
+    context['lecture'] = lecture
+    return render(request, 'teacher/reset-cnf.html', context=context)
+
+@user_passes_test(lambda u: u.is_superuser)
+def reset_attendance_of_lecture(request, pk=None):
+    lecture = LectrueModel.objects.get(pk=pk)
+    teacher = request.user.teacher_profile.all.first()
+    if lecture.teacher.user == request.user:
+        LoginDetails.objects.filter(lecture=lecture, teacher=teacher).delete()
+        return redirect("teacher:dashboard")
+        
+        
+def lec_detail(request, pk=None):
+    context = {}
+    lec = LectrueModel.objects.get(pk=pk)
+    if lec.teacher.user == request.user:
+        context['lecture'] = lec
+    return render(request, "teacher/lecture_detail.html", context)

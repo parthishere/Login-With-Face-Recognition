@@ -41,3 +41,4 @@ xlwt==1.3.0
 urllib3==1.26.4
 python-dev-tools
 python-dotenv==0.19.2
+plotly

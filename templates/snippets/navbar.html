@@ -1,6 +1,7 @@
 {% load static %}
 
 <nav class="navbar sticky-top fixed-top navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
   <a class="navbar-brand" href="{% url 'recognizer:home' %}">
   <img src="{% static 'images/favicon.png' %%}" width="30" height="30" class="d-inline-block align-center" alt="">
    <span class="navbar-brand mb-0 h1">LogUp</span></a>
@@ -9,9 +10,9 @@
   </button>
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-">
       <li class="nav-item active">
-        <a class="nav-link" href="{% url 'recognizer:home' %}">Home <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="{% url 'recognizer:home' %}">Home <span class="sr-only"></span></a>
       </li>
 
 
@@ -45,7 +46,10 @@
        
     </ul>
 
-
-
-
+    <form class="d-flex" method='GET' action="{% url 'teacher:search-stud' %}">
+      <input class="form-control" type="search" name='q' placeholder="Search" aria-label="Search" value='{{ request.GET.q }}'>
+      <button class="btn btn-outline-success" type="submit">Search</button>
+    </form>
+  </div>
+</div>
 </nav>

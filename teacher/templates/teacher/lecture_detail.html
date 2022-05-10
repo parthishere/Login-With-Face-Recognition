@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+<br>
+<br>
+<center>
+    <h5>
+{{ lecture.lecture_name }} by {{ lecture.teacher }}
+    </h5>
+    <br>
+    
+Semester: {{ lecture.semester }} of branch {{ lecture.branch }}
+<br>
+<br>
+</br>
+<hr>
+<hr>
+
+
+<center>
+<a href="{% url "teacher:reset-cnf" pk=lecture.pk %}">
+    <button class='btn btn-danger'>Reset Attandace of Lecture</button>
+</a>
+{% endblock %}

@@ -368,9 +368,9 @@ def signup_view(request):
             
             user = authenticate(request, username=username, password=password)
             if user is None:
-                user = User.objects.create(username=username, email=email, password=password)
-                # user.set_password(password)
-                # user.save()
+                user = User.objects.create(username=username, email=email)
+                user.set_password(password)
+                user.save()
                 login(request, user=user)
                 
                 signup_form = AuthenticationForm(request.POST or None)
@@ -402,6 +402,8 @@ def profile_view(request, pk=None):
     try:
         if request.user == instance.user:
             login_instance = LoginDetails.objects.filter(user=request.user)
+            if request.user.is_superuser:
+                context['attendance'] = LoginDetails.objects.filter(user=request.user).count()
     except: 
         pass
     
@@ -409,7 +411,7 @@ def profile_view(request, pk=None):
     # if request.user == instance.user or request.user.is_staff:
     context['object'] = instance
     context['teacher'] = False
-
+        
     context['login_object'] = login_instance
     try:
         if instance.user.teacher_profile.all().first():
@@ -421,7 +423,41 @@ def profile_view(request, pk=None):
         pass
     return render(request, 'recognizer/profile.html', context=context)
 
+from plotly.offline import plot
+import plotly.graph_objs as go
 
+def lecture_details(request, pk=None):
+    context={}
+    
+    user_profile = UserProfile.objects.get(pk=pk)
+    user = user_profile.user
+    
+    x_lables = []
+    y_lables = []
+    login = LoginDetails.objects.filter(user=user)
+    for x in login:
+        if f"{x.lecture.lecture_name}/{x.teacher.user.username}" in x_lables:
+            pass
+        else:
+            x_lables.append(f"{x.lecture.lecture_name}/{x.teacher.user.username}")
+    for i in x_lables:
+        i = i.split('/')
+        lecture = i[0]
+        teacher = i[1]
+        y_lables.append(LoginDetails.objects.filter(lecture__lecture_name =lecture,teacher__user__username=teacher).count())
+   
+    context['lectures_name'] = zip(x_lables, y_lables)
+    print(x_lables)
+    print(y_lables)
+    fig = go.Figure()
+    scatter = go.Bar(x=x_lables, y=y_lables,
+                        name='test',
+                        opacity=0.8, marker_color='green')
+    fig.add_trace(scatter)
+    plot_div = plot(fig ,  output_type='div', include_plotlyjs=False, show_link=False, link_text="")
+    context['plot_div'] = plot_div
+
+    return render(request, "recognizer/lectures-details.html", context)
 
 @login_required(login_url='recognizer:login')
 def update_profile_view(request, pk=None):
@@ -501,10 +537,13 @@ def delete_profile(request, pk=None):
     except:
         return reverse("recognizer:home")
     
+    if (request.user.is_superuser and user_profile.user.is_superuser) and (request.user.is_superuser != user_profile.user.is_superuser):
+        messages.error(request, "Is teacher cannot delete account!")
+        return reverse("recognizer:home")
     if request.user.is_superuser:
         user_profile.delete()
         user.delete()
-        
+        messages.success(request, "Account Deleted!")
     return reverse("recognizer:home")
 
 

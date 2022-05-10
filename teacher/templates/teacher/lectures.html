@@ -34,7 +34,7 @@
             <h6 class="mb-0">Lecture</h6>
           </div>
           <div class="col-sm-9 text-secondary">
-            {{ object.lecture_name }} of Branch: {{ object.branch }}, Semester: {{ object.semester }} </a> &nbsp
+            <a href="{% url "teacher:lec-detail" pk=object.pk %}">{{ object.lecture_name }}</a> of Branch: {{ object.branch }}, Semester: {{ object.semester }} </a> &nbsp&nbsp
             <a "padding-left:30px;" href="{% url 'teacher:lec-update' pk=object.pk %}">Update</a>
             <a style="float:right;" href={{ object.get_delete_url }}><b><font color='red'> X </font></b></a>
           </div>
