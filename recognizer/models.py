@@ -195,8 +195,6 @@ def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
         obj = TeacherProfileModel.objects.get(user=instance)
     except:
         obj = None
-    if instance.image:
-        instance.bit64_image = base64.b64encode(instance.image)
     if instance.is_superuser and obj is None:
         obj = TeacherProfileModel.objects.create(user=instance)
 
