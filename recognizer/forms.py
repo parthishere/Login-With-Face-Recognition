@@ -7,7 +7,7 @@ from .models import LectrueModel, TeacherProfileModel, User, UserProfile
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField()
-    email = forms.EmailField()
+    email = forms.EmailField(required=False)
     password = forms.CharField(widget=forms.PasswordInput)
     
         
@@ -30,6 +30,10 @@ class FirstTimeUserProfileForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super(FirstTimeUserProfileForm, self).__init__(*args, **kwargs)
+        self.fields['enrollment_number'].required = True
+        self.fields['college'].required = True
+        self.fields['branch'].required = True
+        self.fields['semester'].required = True
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
             
@@ -55,6 +59,10 @@ class UserProfileImageForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(UserProfileImageForm, self).__init__(*args, **kwargs)
+        self.fields['enrollment_number'].required = True
+        self.fields['college'].required = True
+        self.fields['branch'].required = True
+        self.fields['semester'].required = True
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
     
@@ -70,8 +78,10 @@ class LectureDetailsForm(forms.ModelForm):
         
         user_profile = UserProfile.objects.get(user=self.user)
         super().__init__(*args, **kwargs)
+        self.fields['teacher'].required = True
+        self.fields['lecture'].required = True
         self.fields['teacher'].queryset = TeacherProfileModel.objects.filter(college=user_profile.college, branch=user_profile.branch)
-        self.fields['teacher'].widget.attrs.update({'class':'form-control'})
+        self.fields['teacher'].widget.attrs.update({'class':'form-control', 'required':'true'})
         self.fields['lecture'].widget.attrs.update({'class':'form-control'})
         
         self.fields['lecture'].queryset = LectrueModel.objects.none()

@@ -32,5 +32,9 @@ class LectureForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super(LectureForm, self).__init__(*args, **kwargs)
+        self.fields['lecture_name'].required = True
+        self.fields['branch'].required = True
+        self.fields['semester'].required = True
+ 
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'

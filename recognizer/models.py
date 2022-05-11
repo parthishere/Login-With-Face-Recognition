@@ -219,10 +219,10 @@ class LectrueModel(models.Model):
         ('6', '6th Semester'),
     )
     
-    lecture_name = models.CharField(default="", max_length=100)
-    teacher = models.ForeignKey(TeacherProfileModel, blank=True, null=True, related_name='lectures', on_delete=models.CASCADE)
+    lecture_name = models.CharField(max_length=100)
+    teacher = models.ForeignKey(TeacherProfileModel, related_name='lectures', on_delete=models.CASCADE, null=True, blank=True)
     semester = models.CharField(choices=SEMESTER_CHOICES, default='1', max_length=1)
-    branch = models.CharField(choices=BRANCH_CHOICES, null=True, blank=True, max_length=5)
+    branch = models.CharField(choices=BRANCH_CHOICES, max_length=5, null=True, blank=True)
        
     def __str__(self):
         return self.lecture_name

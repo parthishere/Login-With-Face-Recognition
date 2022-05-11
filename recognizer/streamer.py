@@ -86,16 +86,14 @@ def detectImageNew(frame, details):
 
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, known_face_name, (left, top), font, 0.8, (255,255,255),1)
-            print("valid !!")
-            print(known_face_name)
             login_proceed = True
             print(str(details['username']+details['unique_id']))
             print(str(details['username']+details['unique_id']) == known_face_name)
     
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-
     return frame, login_proceed, known_face_name, known_face_name
+
 
 
 def detectImage(frame, details):

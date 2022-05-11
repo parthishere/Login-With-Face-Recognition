@@ -226,9 +226,7 @@ def home_view(request):
             allowed_masks = (".{}".format(i) for i in range(256)) 
             for mask in allowed_masks:
                 allowed_ips.append(str(allowed_ip_host)+str(mask))
-            
-        if teacher_user.ip1 is None and teacher_user.ip2 is None:
-            pass
+
         
         lecture_object = LectrueModel.objects.get(id=lecture)
         try:
@@ -242,7 +240,7 @@ def home_view(request):
             print("no objects")
         
         
-        if not user_ip in allowed_ips:
+        if not user_ip in allowed_ips or (teacher_user.ip1 is None and teacher_user.ip2 is None):
             print("HTTP_X_FORWARDED_FOR is not in allowed_ip")
             messages.error(request,"Your IP is not in same subnet IPs")
             url = reverse('recognizer:home')
@@ -371,7 +369,7 @@ def signup_view(request):
     if request.POST :
         if signup_form.is_valid():
             username = signup_form.cleaned_data.get('username')
-            email = signup_form.cleaned_data.get('email')
+            email = signup_form.cleaned_data.get('email') or None
             password = signup_form.cleaned_data.get('password')
             
             user = authenticate(request, username=username, password=password)
