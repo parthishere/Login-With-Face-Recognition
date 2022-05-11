@@ -211,7 +211,7 @@ def reset_confirm_view(request, pk=None):
 @user_passes_test(lambda u: u.is_superuser)
 def reset_attendance_of_lecture(request, pk=None):
     lecture = LectrueModel.objects.get(pk=pk)
-    teacher = request.user.teacher_profile.all.first()
+    teacher = request.user.teacher_profile.all().first()
     if lecture.teacher.user == request.user:
         LoginDetails.objects.filter(lecture=lecture, teacher=teacher).delete()
         return redirect("teacher:dashboard")
