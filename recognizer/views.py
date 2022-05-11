@@ -211,11 +211,10 @@ def home_view(request):
             teacher_user.ip1 = ip1
             teacher_user.save()
             
-        
+        allowed_ips = []
         print("user ip (HTTP_X_FORWARDED_FOR): "+ user_ip)
         print('user ip (REMOTE_ADDR): '+ request.META['REMOTE_ADDR'])
         if teacher_user.ip1:
-            allowed_ips = []
             allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:3])
             allowed_masks = (".{}".format(i) for i in range(256))
             for mask in allowed_masks:
