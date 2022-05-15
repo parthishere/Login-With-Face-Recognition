@@ -7,9 +7,6 @@ django-allauth==0.44.0
 django-cleanup==5.2.0
 dlib==19.22.0
 face-recognition==1.3.0
-gast==0.4.0
-google-auth==1.30.0
-google-auth-oauthlib==0.4.4
 gunicorn==20.1.0
 h5py==3.1.0
 json5==0.9.5
@@ -22,11 +19,7 @@ opencv-python-headless==4.5.3.56
 pillow==8.2.0
 psycopg2==2.8.6
 pycparser==2.20
-Pygments==2.9.0
 PyJWT==2.1.0
-pyparsing==2.4.7
-pyrsistent==0.17.3
-python-dateutil==2.8.1
 python3-openid==3.2.0
 pytz==2021.1
 requests==2.25.1
@@ -39,8 +32,8 @@ django-import-export==2.7.1
 imutils
 xlwt==1.3.0
 urllib3==1.26.4
-python-dev-tools
 python-dotenv==0.19.2
 plotly
 django-storages
 boto3
+djangorestframework

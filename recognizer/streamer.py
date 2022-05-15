@@ -27,7 +27,7 @@ import os
 import face_recognition
 
 def detectImageNew(frame, details):
-    print('start')
+
     s3 = boto3.client('s3',
                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
@@ -40,9 +40,7 @@ def detectImageNew(frame, details):
     image = np.asarray(bytearray(resp.read()), dtype="uint8")
     image = cv2.imdecode(image, cv2.IMREAD_COLOR)
     
-    
-    
-    # img = face_recognition.load_image_file(image)
+
     known_face_encoding = face_recognition.face_encodings(image)[0]
     
     username = details['username']
@@ -63,7 +61,6 @@ def detectImageNew(frame, details):
         print(face_distance)
         
         if match[0] == True:
-            print("login_proceed")
             login_proceed = True
         
     except Exception as e:
@@ -87,8 +84,6 @@ def detectImageNew(frame, details):
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, known_face_name, (left, top), font, 0.8, (255,255,255),1)
             login_proceed = True
-            print(str(details['username']+details['unique_id']))
-            print(str(details['username']+details['unique_id']) == known_face_name)
     
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 

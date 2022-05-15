@@ -5,6 +5,9 @@ from django.contrib import messages
 from django.http.response import HttpResponse, StreamingHttpResponse, JsonResponse
 import cv2
 from django.core.files.base import ContentFile
+from django.conf import settings
+from botocore.client import Config
+import boto3, urllib
 
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import FirstTimeUserProfileForm, SecondTimeUserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
@@ -76,7 +79,6 @@ def export_users_xls(request):
 
         row_num += 1
         ws.row(row_num).height_mismatch = True
-
         
         
         for col_num in range(len(row)):
@@ -94,14 +96,23 @@ def export_users_xls(request):
                 
             elif col_num == 7:
                 #image 
-                path = LoginDetails.objects.filter(teacher=teacher)[row_num-1].processed_img.path
-                # path2 = os.path.abspath(path)
+                path = LoginDetails.objects.filter(teacher=teacher)[row_num-1].processed_img
+                print(path)
                 
-                img = Image.open(path)
+                s3 = boto3.client('s3',
+                         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                         config=Config(signature_version='s3v4'),
+                         region_name='ap-south-1'
+                         )
+                url=s3.generate_presigned_url('get_object', Params={'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': f"media/{path}"})
+                resp = urllib.request.urlopen(url)
+                img = Image.open(resp)
                 image_parts = img.split()
                 r = image_parts[0]
                 g = image_parts[1]
                 b = image_parts[2]
+                
                 img = Image.merge("RGB", (r, g, b))
                 fo = BytesIO()
                 img.save(fo, format='bmp')
@@ -212,8 +223,7 @@ def home_view(request):
             teacher_user.save()
             
         allowed_ips = []
-        print("user ip (HTTP_X_FORWARDED_FOR): "+ user_ip)
-        print('user ip (REMOTE_ADDR): '+ request.META['REMOTE_ADDR'])
+
         if teacher_user.ip1:
             allowed_ip_host = ".".join(teacher_user.ip1.split('.')[0:3])
             allowed_masks = (".{}".format(i) for i in range(256))
@@ -239,8 +249,7 @@ def home_view(request):
             print("no objects")
         
         
-        if not user_ip in allowed_ips or (teacher_user.ip1 is None and teacher_user.ip2 is None):
-            print("HTTP_X_FORWARDED_FOR is not in allowed_ip")
+        if not user_ip in allowed_ips or not (teacher_user.ip1 is None and teacher_user.ip2 is None):
             messages.error(request,"Your IP is not in same subnet IPs")
             url = reverse('recognizer:home')
             return JsonResponse(status = 302 , data = {'success' : url })
@@ -262,15 +271,13 @@ def home_view(request):
                 'image':user.image,
                 'base64_image':user.bit64_image,
                 }
-                print(details)
+
             except Exception as e:
-                print(e)
                 details = None
             
             frame, login_proceed, names, known_face_names = get_face_detect_data(file, details)
             ret, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
-            print(login_proceed, names, known_face_names)
             if login_proceed:
                 context['login_detail'] = True
                 user.login_proceed = login_proceed
@@ -287,7 +294,6 @@ def home_view(request):
                 
                 return JsonResponse(status = 302 , data = {'success' : url })
             else:
-                print("Face not recognized")
                 context['login_detail'] = False
                 user.login_proceed = login_proceed
                 user.save()
@@ -298,7 +304,6 @@ def home_view(request):
                 url = reverse('recognizer:home')
                 return JsonResponse(status = 302 , data = {'success' : url })
         else:
-            print("Session hasn'e started")
             messages.error(request,f"Session hasn't started by {teacher_user.user.username}, Can't take attendance")
             url = reverse('recognizer:home')
                 
@@ -385,7 +390,6 @@ def signup_view(request):
                 user_profile = UserProfile.objects.get(user=user)
                 # uqid = get_uqid(request=request)
                 request.session['user_pk'] = user_profile.pk
-                print(user_profile)
                 return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
                 messages.error(request, 'User already exists!')
@@ -452,8 +456,7 @@ def lecture_details(request, pk=None):
         y_lables.append(LoginDetails.objects.filter(lecture__lecture_name =lecture,teacher__user__username=teacher).count())
    
     context['lectures_name'] = zip(x_lables, y_lables)
-    print(x_lables)
-    print(y_lables)
+
     fig = go.Figure()
     scatter = go.Bar(x=x_lables, y=y_lables,
                         name='test',
@@ -582,11 +585,11 @@ def get_uqid(request):
 
 
 
-################################################3
 #################################################
-####################################################33
-#################################################333
-###################################################3
+#################################################
+#################################################
+#################################################
+#################################################
 
 
 
@@ -608,14 +611,11 @@ def login_with_face(request):
             'unique_id':user.unique_id,
             'user':user,
             }
-            print(details)
         except:
             details = None
         
         names, known_lables, login_proceed = Recognizer(details, username=user.user.username, unique_id=user.unique_id)
-        
-        print(names, known_lables, login_proceed)
-        print(request.user.username + user.unique_id)
+
 
         if str(request.user.username + user.unique_id) in names:
             context['login_detail'] = True
@@ -634,7 +634,7 @@ def login_with_face(request):
 
             messages.error(request, 'stfu b** get your ass out of my website..')
             return redirect('recognizer:home')
-    print(context)
+
     return render(request, 'recognizer/home.html', context)
         
         

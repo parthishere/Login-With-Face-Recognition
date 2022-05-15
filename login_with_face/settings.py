@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'teacher',
     'import_export',
     
+    'rest_framework',
     'django_cleanup.apps.CleanupConfig',
 ]
 
