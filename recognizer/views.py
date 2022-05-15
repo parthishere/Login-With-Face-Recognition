@@ -214,11 +214,11 @@ def home_view(request):
         lecture = request.POST['lecture']
         ip1, ip2 = None, None
         try:
-            ip1 = request.POST['ip1']
+            ip1 = request.POST['ip1'] or None
         except:
             pass
         teacher_user = TeacherProfileModel.objects.get(id=teacher)
-        if request.user == teacher_user.user and (ip1 or ip2):
+        if request.user == teacher_user.user:
             teacher_user.ip1 = ip1
             teacher_user.save()
             
