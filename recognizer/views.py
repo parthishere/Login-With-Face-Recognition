@@ -214,7 +214,9 @@ def home_view(request):
         lecture = request.POST['lecture']
         ip1, ip2 = None, None
         try:
-            ip1 = request.POST['ip1'] or None
+            ip1 = request.POST['ip1'] 
+            if ip1 == '':
+                ip1 = None
         except:
             pass
         teacher_user = TeacherProfileModel.objects.get(id=teacher)
@@ -238,21 +240,28 @@ def home_view(request):
 
         
         lecture_object = LectrueModel.objects.get(id=lecture)
+        
         try:
             o = teacher_user.change_website_objects.all().count()
+            print(o)
             c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user).order_by('id').last()
+            print(c)
             context['recognize'] = c.recognize
-        except:
+        except Exception as e:
             o = 0
             context['recognize'] = False
+            
         if o == 0:
             print("no objects")
         
         
-        if not user_ip in allowed_ips or not (teacher_user.ip1 is None and teacher_user.ip2 is None):
-            messages.error(request,"Your IP is not in same subnet IPs")
-            url = reverse('recognizer:home')
-            return JsonResponse(status = 302 , data = {'success' : url })
+        if not user_ip in allowed_ips:
+            if (teacher_user.ip1 is None and teacher_user.ip2 is None):
+                pass
+            else:
+                messages.error(request,"Your IP is not in same subnet IPs")
+                url = reverse('recognizer:home')
+                return JsonResponse(status = 302 , data = {'success' : url })
         
         if o%2==0:
 
