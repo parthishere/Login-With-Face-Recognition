@@ -1,9 +1,8 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 
 from login_details.models import LoginDetails
 
-from .models import LectrueModel, TeacherProfileModel, User, UserProfile
+from .models import LectrueModel, TeacherProfileModel, UserProfile
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField()

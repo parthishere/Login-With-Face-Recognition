@@ -92,7 +92,7 @@ IP address
 
 
 <div class='container-fluid'>
-{% if request.user.is_superuser or request.user in request.user.teacher_profile.all %}
+{% if request.user.is_staff or request.user in request.user.teacher_profile.all %}
 <hr>
 </br>
 <form method='POST' action="{% url 'recognizer:change-website' %}">

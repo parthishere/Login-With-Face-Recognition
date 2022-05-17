@@ -1,9 +1,9 @@
 from django.urls import reverse
 from django.db import models
 
-from recognizer.models import UserProfile, TeacherProfileModel, LectrueModel
+from recognizer.models import TeacherProfileModel, LectrueModel
 from django.contrib.auth.models import User
-import recognizer, datetime, os
+import datetime, os
 
 def processed_image_path(instance, filename):
     

@@ -1,15 +1,13 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect, reverse
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.decorators import login_required
-from recognizer.models import User, UserProfile, TeacherProfileModel, LectrueModel
+from recognizer.models import UserProfile, TeacherProfileModel, LectrueModel
 from login_details.models import LoginDetails
-from recognizer.views import login_view
-from .forms import IpAddress, TeacherUpdateForm, LectureForm
+from .forms import TeacherUpdateForm, LectureForm
 from django.db.models import Q
 
 # Create your views here.
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def profile_view(request):
     context={}
     try:
@@ -26,7 +24,7 @@ def profile_view(request):
     return render(request, 'teacher/index.html', context=context)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def profile_list_view(request):
     context = {}
     try:
@@ -34,8 +32,8 @@ def profile_list_view(request):
         context['teacher'] = teacher
         context['user_profile'] = teacher.user.user_profile.all().first()
         
-        teachers_user_profiles = TeacherProfileModel.objects.all().values('user')
-        students = UserProfile.objects.filter(college=teacher.college, branch=teacher.branch).exclude(user__is_superuser=True)
+        # teachers_user_profiles = TeacherProfileModel.objects.all().values('user')
+        students = UserProfile.objects.filter(college=teacher.college, branch=teacher.branch).exclude(user__is_staff=True)
         context['objects'] = students
         context['is_student'] = "Student"
     except:
@@ -43,7 +41,7 @@ def profile_list_view(request):
     
     return render(request, 'teacher/students-list.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def teacher_profile_list_view(request):
     context = {}
     try:
@@ -61,7 +59,7 @@ def teacher_profile_list_view(request):
     return render(request, 'teacher/teacher-list.html', context=context)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def teacher_profile_update_view(request):
     edit_form = None
     instance = None
@@ -85,12 +83,13 @@ def teacher_profile_update_view(request):
                 context = {
                     'form':edit_form,
                 }
-                return HttpResponseRedirect(reverse("teacher:dashboard"))
+                return redirect("teacher:dashboard")
             else:
                 context = {
                     'form':edit_form,
                 }
                 messages.error(request, "Somthing is wrong ..")
+                return redirect("teacher:dashboard")
 
     return render(request, 'teacher/update-teacher-profile.html', context=context)
 
@@ -104,13 +103,13 @@ def update_ips(request):
             teacher.ip1 = ip1
             teacher.save()
             messages.success(request, "IP Updated Sucsessfuly")
-            return HttpResponseRedirect(reverse("recognizer:home"))
+            return redirect("recognizer:home")
         
     except:
         return redirect("recognizer:login")
     
     
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def lecture_list_view(request):
     context = {}
     try:
@@ -133,7 +132,7 @@ def lec_detail_view(request, pk=None):
     context['lecture'] = lecture
     return render(request, 'teacher/lectures_detail.html', context=context) 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def add_lecture(request):
     context = {}
     form = LectureForm(request.POST or None)
@@ -160,24 +159,24 @@ def search_student(request):
                 Q(user__email__icontains=query) |
                 Q(enrollment_number__icontains=query) |
                 Q(phone_number__icontains=query)
-            ).exclude(user__is_superuser=True)
+            ).exclude(user__is_staff=True)
     context['is_student'] = "Student"
     context['objects'] = qs
     return render(request, "teacher/students-list.html", context)
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def search_lectures(request):
     query = request.GET.get('q')
     return (request, "", {})
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def delete_lecture(request, pk=None):
     lecture = LectrueModel.objects.get(pk=pk)
     if request.user == lecture.teacher.user:
         lecture.delete()
     return redirect('teacher:lec')
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def delete_attendance(request, pk=None):
     att = LoginDetails.objects.get(pk=pk)
     if att.teacher.user == request.user:
@@ -185,13 +184,13 @@ def delete_attendance(request, pk=None):
         att.delete()
     return redirect('teacher:dashboard')
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def update_lecture(request, pk=None):
     context = {}
     lec = LectrueModel.objects.get(pk=pk)
     form = LectureForm(request.POST or None, instance=lec)
     context['form'] = form
-    print(lec.teacher.user)
+
     if lec.teacher.user == request.user and form.is_valid():
         instance = form.save()
         messages.success(request, "Lecture Updated Succsessfully")
@@ -199,7 +198,7 @@ def update_lecture(request, pk=None):
     return render(request, 'teacher/update-teacher-profile.html',context)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def reset_confirm_view(request, pk=None):
     context = {}
     lecture = LectrueModel.objects.get(pk=pk)
@@ -208,7 +207,7 @@ def reset_confirm_view(request, pk=None):
     context['lecture'] = lecture
     return render(request, 'teacher/reset-cnf.html', context=context)
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def reset_attendance_of_lecture(request, pk=None):
     lecture = LectrueModel.objects.get(pk=pk)
     teacher = request.user.teacher_profile.all().first()

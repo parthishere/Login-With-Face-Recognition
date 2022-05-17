@@ -1,10 +1,8 @@
 from django.db import models
 from django.shortcuts import reverse
-from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save
 
-from login_with_face.settings import BASE_DIR
 from teacher.models import DistrictCollege, CityCollegeModel, CollegeModel, CollegeBranchModel
 import os
 
@@ -126,30 +124,6 @@ class UserProfile(models.Model):
         return reverse("recognizer:del-profile", kwargs={"pk": self.pk})
     
     
-    
-def user_post_save_receiver(sender, instance, *args, **kwargs):
-    try:
-        obj = UserProfile.objects.get(user=instance)
-    except:
-        obj = None
-    
-    if obj is not None:
-        pass
-    else:
-        obj = UserProfile.objects.create(user=instance)
-        
-    try:    
-        if obj.unique_id is None:
-            obj.unique_id = unique_id_generator(obj)
-            obj.save()
-        else:
-            pass
-    except:
-        pass
-
-post_save.connect(user_post_save_receiver, sender=User)
-
-
 
 class TeacherProfileModel(models.Model):
     
@@ -186,20 +160,7 @@ class TeacherProfileModel(models.Model):
     def __str__(self):
         name = self.user.username + str(self.pk)
         return "{} {}".format(self.user.username, self.pk)
- 
- 
-import base64
-    
-def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
-    try:
-        obj = TeacherProfileModel.objects.get(user=instance)
-    except:
-        obj = None
-    if instance.is_superuser and obj is None:
-        obj = TeacherProfileModel.objects.create(user=instance)
 
-
-post_save.connect(user_post_save_receiver_for_teacher, sender=User)
     
 
 
@@ -248,14 +209,6 @@ class ChangeWebsiteCount(models.Model):
         
     def __str__(self):
         return str(self.pk)
-    
-def pre_save_change_website_reciever(sender, instance, *args, **kwargs):
-    if ChangeWebsiteCount.objects.filter(teacher=instance.teacher).count() % 2:
-        instance.recognize = True
-    else:
-        instance.recognize=False
-
-pre_save.connect(pre_save_change_website_reciever, sender=ChangeWebsiteCount)
 
 
 
@@ -267,4 +220,53 @@ class IPAddress(models.Model):
     
     def __str__(self):
         return self.ipAddress1 + " " + self.ipAddress2 + " " + str(self.teacher.user.username) 
+  
+ 
+#__________________________________________________________________________________________________________ 
+ 
     
+def user_post_save_receiver(sender, instance, *args, **kwargs):
+    try:
+        obj = UserProfile.objects.get(user=instance)
+    except:
+        obj = None
+    
+    if obj is not None:
+        pass
+    else:
+        obj = UserProfile.objects.create(user=instance)
+        
+    try:    
+        if obj.unique_id is None:
+            obj.unique_id = unique_id_generator(obj)
+            obj.save()
+        else:
+            pass
+    except:
+        pass
+
+post_save.connect(user_post_save_receiver, sender=User)
+
+
+
+def pre_save_change_website_reciever(sender, instance, *args, **kwargs):
+    if ChangeWebsiteCount.objects.filter(teacher=instance.teacher).count() % 2:
+        instance.recognize = True
+    else:
+        instance.recognize=False
+
+pre_save.connect(pre_save_change_website_reciever, sender=ChangeWebsiteCount)
+
+
+
+
+def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
+    try:
+        obj = TeacherProfileModel.objects.get(user=instance)
+    except:
+        obj = None
+    if instance.is_staff and obj is None:
+        obj = TeacherProfileModel.objects.create(user=instance)
+
+
+post_save.connect(user_post_save_receiver_for_teacher, sender=User)

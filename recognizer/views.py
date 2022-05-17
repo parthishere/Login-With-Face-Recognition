@@ -1,4 +1,3 @@
-from django.urls import reverse_lazy
 from django.shortcuts import render, HttpResponseRedirect, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -12,7 +11,6 @@ import boto3, urllib
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import FirstTimeUserProfileForm, SecondTimeUserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
 from .recognizer import RecognizerClass, Recognizer 
-from django.http import JsonResponse
 
 from login_details.models import LoginDetails
 
@@ -29,8 +27,12 @@ import xlwt
 
 from django.contrib.auth.decorators import user_passes_test
 
+from plotly.offline import plot
+import plotly.graph_objs as go
 
-@user_passes_test(lambda u: u.is_superuser)
+from .streamer import get_face_detect_data
+
+@user_passes_test(lambda u: u.is_staff)
 def export_users_xls(request):
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
@@ -127,7 +129,7 @@ def export_users_xls(request):
     return response
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def change_whole_site_by_clicking(request):
     next_ = "recognizer:home"
     context = {}
@@ -136,7 +138,7 @@ def change_whole_site_by_clicking(request):
             next_ = request.POST['next']
         except:
             next_ = "recognizer:home"
-        if request.user.is_superuser or request.user in request.user.teacher_profile.all():
+        if request.user.is_staff or request.user in request.user.teacher_profile.all():
             teacher = request.user.teacher_profile.all().last()
 
             if ChangeWebsiteCount.objects.filter(teacher=teacher).count() % 2 == 0:
@@ -157,7 +159,7 @@ def change_whole_site_by_clicking(request):
     return render(request, 'recognizer/home.html', context=context)
     
 
-from .streamer import get_face_detect_data
+
 
 
 
@@ -243,9 +245,7 @@ def home_view(request):
         
         try:
             o = teacher_user.change_website_objects.all().count()
-            print(o)
             c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user).order_by('id').last()
-            print(c)
             context['recognize'] = c.recognize
         except Exception as e:
             o = 0
@@ -277,14 +277,12 @@ def home_view(request):
                 'unique_id':user.unique_id,
                 'user':user,
                 'superuser':request.user.is_superuser,
-                'image':user.image,
-                'base64_image':user.bit64_image,
                 }
 
             except Exception as e:
                 details = None
             
-            frame, login_proceed, names, known_face_names = get_face_detect_data(file, details)
+            frame, login_proceed = get_face_detect_data(file, details)
             ret, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
             if login_proceed:
@@ -370,7 +368,7 @@ def login_view(request):
 
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def signup_view(request):
     signup_form = AuthenticationForm(request.POST or None)
     context = {
@@ -390,7 +388,7 @@ def signup_view(request):
                 user = User.objects.create(username=username, email=email)
                 user.set_password(password)
                 user.save()
-                login(request, user=user)
+                # login(request, user=user)
                 
                 signup_form = AuthenticationForm(request.POST or None)
                 context['form'] = signup_form
@@ -398,8 +396,8 @@ def signup_view(request):
                 
                 user_profile = UserProfile.objects.get(user=user)
                 # uqid = get_uqid(request=request)
-                request.session['user_pk'] = user_profile.pk
-                return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
+                # request.session['user_pk'] = user_profile.pk
+                return redirect(reverse('recognizer:signup'))
             else:
                 messages.error(request, 'User already exists!')
                 context['form'] = signup_form
@@ -420,7 +418,7 @@ def profile_view(request, pk=None):
     try:
         if request.user == instance.user:
             login_instance = LoginDetails.objects.filter(user=request.user)
-            if request.user.is_superuser:
+            if request.user.is_staff:
                 context['attendance'] = LoginDetails.objects.filter(user=request.user).count()
     except: 
         pass
@@ -441,8 +439,7 @@ def profile_view(request, pk=None):
         pass
     return render(request, 'recognizer/profile.html', context=context)
 
-from plotly.offline import plot
-import plotly.graph_objs as go
+
 
 def lecture_details(request, pk=None):
     context={}
@@ -477,8 +474,6 @@ def lecture_details(request, pk=None):
     return render(request, "recognizer/lectures-details.html", context)
 
 
-import base64
-
 @login_required(login_url='recognizer:login')
 def update_profile_view(request, pk=None):
     edit_form = None
@@ -486,18 +481,17 @@ def update_profile_view(request, pk=None):
         instance = UserProfile.objects.get(pk=pk)
     except:
         instance = None
-    if not instance.updated or instance.user.is_superuser:
+    if not instance.updated or instance.user.is_staff:
         edit_form = FirstTimeUserProfileForm(request.POST, request.FILES, instance=instance)
     else:
         edit_form = SecondTimeUserProfileForm(request.POST, request.FILES, instance=instance)
     context = {
             'form':edit_form,
         }
-    if instance.user == request.user or request.user.is_superuser:
+    if instance.user == request.user or request.user.is_staff:
         if request.POST:
             if edit_form.is_valid():
                 user = edit_form.save()
-                img = edit_form.cleaned_data.get('image')
                 instance.updated = True
                 instance.save()
                 
@@ -518,7 +512,7 @@ def update_profile_view(request, pk=None):
 
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def update_profile_image_view(request, pk=None):
     try: 
         instance = UserProfile.objects.get(pk=pk)
@@ -528,12 +522,10 @@ def update_profile_image_view(request, pk=None):
     context = {
             'form':edit_form,
         }
-    if instance.user == request.user or request.user.is_superuser:
+    if instance.user == request.user or request.user.is_staff:
         if request.POST:
             if edit_form.is_valid():
-                img = request.FILES.get('image')
                 user = edit_form.save()
-                instance.image = img
                 instance.save()
                 
                 messages.success(request, "Profile Image Edited Sucsessfuly")
@@ -551,7 +543,7 @@ def update_profile_image_view(request, pk=None):
     return render(request, 'recognizer/profile_form.html', context=context)
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def delete_profile(request, pk=None):
     try:   
         user_profile = UserProfile.objects.get(pk=pk)
@@ -559,10 +551,10 @@ def delete_profile(request, pk=None):
     except:
         return reverse("recognizer:home")
     
-    if (request.user.is_superuser and user_profile.user.is_superuser) and (request.user.is_superuser != user_profile.user.is_superuser):
+    if (request.user.is_staff and user_profile.user.is_staff) and (request.user.is_staff != user_profile.user.is_staff):
         messages.error(request, "Is teacher cannot delete account!")
         return reverse("recognizer:home")
-    if request.user.is_superuser:
+    if request.user.is_staff:
         user_profile.delete()
         user.delete()
         messages.success(request, "Account Deleted!")

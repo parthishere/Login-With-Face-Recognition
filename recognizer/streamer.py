@@ -1,12 +1,9 @@
-import base64
-import cv2
+import base64, cv2, io, boto3, urllib
 import numpy as np
 from PIL import Image
-import io
 from django.conf import settings
 from botocore.client import Config
-import boto3
-import urllib
+
 
 def stringToImage(base64_string):
     imgdata = base64.b64decode(base64_string)
@@ -18,9 +15,8 @@ def base64_encode(data):
     
 def get_face_detect_data(file, details):
     img = cv2.imdecode(np.fromstring(file, np.uint8), cv2.IMREAD_UNCHANGED)
-    image_data, proceed_login, names, known_face_names = detectImageNew(img, details)
-    print(f"Recognized Face name {str(names)}, Known face name from image directory {str(known_face_names)}" )
-    return image_data, proceed_login, names, known_face_names
+    image_data, proceed_login = detectImageNew(img, details)
+    return image_data, proceed_login
 
 
 import os
@@ -92,7 +88,7 @@ def detectImageNew(frame, details):
 
 
 def detectImage(frame, details):
-    print(details['image'].path)
+
     print("start")
     
     known_face_encodings = []
@@ -172,5 +168,5 @@ def detectImage(frame, details):
     
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     
-    return frame, proceed_login, names, known_face_names
+    return frame, proceed_login
 

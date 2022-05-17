@@ -191,12 +191,12 @@
           </div>
 
           <center>
-          {% if object.user == request.user or request.user.is_superuser%}
+          {% if object.user == request.user or request.user.is_staff%}
           <a href="{% url 'recognizer:update-profile' object.pk %}"><button type="button" class="btn btn-info">Update</button></a>
           <a href="{% url 'recognizer:update-img-profile' object.pk %}"><button type="button" class="btn btn-primary">Update Image</button></a>
           {% else %}{% endif %}
 
-          {% if request.user.is_superuser %}
+          {% if request.user.is_staff %}
           <a href="{% url 'recognizer:del-profile' object.pk %}"><button type="button" class="btn btn-danger">Delete Profile</button></a>
           {% else %}{% endif %}
           </center>
