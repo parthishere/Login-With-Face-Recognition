@@ -222,3 +222,59 @@ class LogInView(APIView):
 def get_uqid(request):
     user = UserProfile.objects.get(user=request.user)
     return user.unique_id
+
+
+@api_view(['POST'])
+def change_whole_site_by_clicking(request):
+    if request.method == 'POST':
+        if request.user.is_staff or request.user in request.user.teacher_profile.all():
+            teacher = request.user.teacher_profile.all().last()
+
+            if ChangeWebsiteCount.objects.filter(teacher=teacher).count() % 2 == 0:
+                c = ChangeWebsiteCount.objects.create(teacher=teacher)
+                change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
+                
+            else:
+                c = ChangeWebsiteCount.objects.create(teacher=teacher)
+                change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
+                
+                
+            return JsonResponse(status=302, data={})
+        else:
+            return JsonResponse(status=302, data={})
+        
+        
+def load_lectures(request):
+    teacher_id = request.GET.get('teacher')
+    lectures = LectrueModel.objects.filter(teacher_id=teacher_id).all()
+    
+    
+def profile_view(request, pk=None):
+    instance = None
+    login_instance = None
+    try:
+        instance = UserProfile.objects.get(pk=pk)
+    except:
+        pass
+    
+    try:
+        if request.user == instance.user:
+            login_instance = LoginDetails.objects.filter(user=request.user)
+            if request.user.is_staff:
+                context['attendance'] = LoginDetails.objects.filter(user=request.user).count()
+    except: 
+        pass
+    
+    context = {}
+    context['object'] = instance
+    context['teacher'] = False
+        
+    context['login_object'] = login_instance
+    try:
+        if instance.user.teacher_profile.all().first():
+            context['teacher'] = True
+        else:
+            print('no')
+    except:
+        pass
+    
