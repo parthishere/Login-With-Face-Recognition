@@ -83,7 +83,7 @@ def detectImageNew(frame, details):
     
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-    return frame, login_proceed, known_face_name, known_face_name
+    return frame, login_proceed
 
 
 
