@@ -6,7 +6,7 @@ from rest_framework import authentication, permissions
 from django.http.response import JsonResponse
 from django.core.files.base import ContentFile
 import cv2
-from sklearn import datasets
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 from recognizer.streamer import get_face_detect_data
 from login_details.models import LoginDetails
 from django.contrib.auth import (
@@ -102,8 +102,8 @@ class FormSubmit(APIView):
             except Exception as e:
                 details = None
             
-            frame, login_proceed, names, known_face_names = get_face_detect_data(file, details)
-            ret, buf = cv2.imencode('.jpg', frame)
+            frame, login_proceed = get_face_detect_data(file, details)
+            _, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
             if login_proceed:
                 data = {
@@ -143,6 +143,13 @@ class FormSubmit(APIView):
 
 
 
+class IsStaffOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        else:
+            return request.user.is_staff
+    
 
 class SignUPView(APIView):
     """
@@ -152,7 +159,7 @@ class SignUPView(APIView):
     * Only admin users are able to access this view.
     """
     authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [IsStaff]
+    permission_classes = [IsStaffOrReadOnly]
     
     def post(self, request, format=None):
         username = request.data.get('username')
@@ -171,7 +178,7 @@ class SignUPView(APIView):
             }
             user_profile = UserProfile.objects.get(user=user, data=data)
             
-            return JsonResponse(status=302)
+            return JsonResponse(status=302, data=data)
         else:
             messages = 'User already exists!'
             data = {
@@ -212,10 +219,11 @@ class LogInView(APIView):
                 
             if user_profile.updated:
                 url =  reverse('recognizer:home')
+                data['url'] = url
                 return JsonResponse(status=302, data=data)
             else:
-                
                 url = reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk})
+                data['url'] = url
                 return JsonResponse(status=302, data=data)
 
 
@@ -243,7 +251,7 @@ def change_whole_site_by_clicking(request):
         else:
             return JsonResponse(status=302, data={})
         
-        
+@api_view("GET")    
 def load_lectures(request):
     teacher_id = request.GET.get('teacher')
     lectures = LectrueModel.objects.filter(teacher_id=teacher_id).all()

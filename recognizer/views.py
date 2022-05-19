@@ -141,14 +141,9 @@ def change_whole_site_by_clicking(request):
         if request.user.is_staff or request.user in request.user.teacher_profile.all():
             teacher = request.user.teacher_profile.all().last()
 
-            if ChangeWebsiteCount.objects.filter(teacher=teacher).count() % 2 == 0:
-                c = ChangeWebsiteCount.objects.create(teacher=teacher)
-                change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
-                context['recognize'] = c.recognize
-            else:
-                c = ChangeWebsiteCount.objects.create(teacher=teacher)
-                change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
-                context['recognize'] = c.recognize
+            c = ChangeWebsiteCount.objects.create(teacher=teacher)
+            change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
+            context['recognize'] = c.recognize
                 
             if next:
                 return redirect(next_)
