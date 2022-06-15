@@ -8,6 +8,8 @@ from django.conf import settings
 from botocore.client import Config
 import boto3, urllib
 
+import requests
+
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import FirstTimeUserProfileForm, SecondTimeUserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
 from .recognizer import RecognizerClass, Recognizer 
@@ -31,6 +33,8 @@ from plotly.offline import plot
 import plotly.graph_objs as go
 
 from .streamer import get_face_detect_data
+
+from .tasks import after_create
 
 @user_passes_test(lambda u: u.is_staff)
 def export_users_xls(request):
@@ -133,16 +137,22 @@ def export_users_xls(request):
 def change_whole_site_by_clicking(request):
     next_ = "recognizer:home"
     context = {}
+    
     if request.method == 'POST':
         try:
             next_ = request.POST['next']
         except:
             next_ = "recognizer:home"
         if request.user.is_staff or request.user in request.user.teacher_profile.all():
-            teacher = request.user.teacher_profile.all().last()
+            teacher = get_teacher(request)
+            lecture = request.POST['lecture']
+            lecture_obj = LectrueModel.objects.get(lecture_name=lecture, teacher=teacher)
+            c = ChangeWebsiteCount.objects.create(teacher=teacher, lecture=lecture_obj)
+            change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher, lecture=lecture_obj).count()
+            if change_site_count % 2 == 0:
+                # even means recognition is enabled
+                after_create.delay(teacher_username=teacher.user.username, lecture=lecture)
 
-            c = ChangeWebsiteCount.objects.create(teacher=teacher)
-            change_site_count = ChangeWebsiteCount.objects.filter(teacher=teacher).count()
             context['recognize'] = c.recognize
                 
             if next:
@@ -163,6 +173,7 @@ def change_whole_site_by_clicking(request):
 # @allow_by_ip
 @login_required(login_url='recognizer:login')
 def home_view(request):
+    
     try:
         user_ip = request.META['HTTP_X_FORWARDED_FOR']
     except:
@@ -173,33 +184,36 @@ def home_view(request):
     context['recognize'] = False
     context['user_ip'] = user_ip
     context['second_user_ip'] = second_user_ip
+    is_teacher=False
     
     try:
-        teacher = request.user.teacher_profile.all().last()
+        teacher = get_teacher(request)
+        teacher_user = True
+        lecture_counts = {}
+        for lec in teacher.lectures.all():
+            lecture_counts[lec] = lec.change_website_objects_lecture.all().count()
         change_site_count = teacher.change_website_objects.all().count()
         context['change_site_count'] = change_site_count
-    except:
+        context['lectures_with_count'] = lecture_counts
+        print(lecture_counts)
+    except Exception as e:
+        print(e)
         pass
     
     context['data'] = 'Add your cool photo to your profile !'
     login_details_form = LectureDetailsForm(request.POST, request.FILES, user=request.user)
     context['login_details_form'] = login_details_form
 
-    is_teacher=False
-    teacher_user = None
+    
     try:
         user = request.user
-        try:
-            teacher_user = TeacherProfileModel.objects.get(user=user)
-            is_teacher = True
-            user = UserProfile.objects.get(user=user)
-        except:
-            user = UserProfile.objects.get(user=user)
         
-        context['user'] = user
+        user_profile = UserProfile.objects.get(user=user)
+        
+        context['user'] = user_profile
         context['teacher'] = is_teacher
-        context['teacher_user'] = teacher_user
-        context['premium_data'] = LoginDetails.objects.filter(user=request.user)
+        context['teacher_user'] = teacher
+        context['premium_data'] = LoginDetails.objects.filter(user=user)
     except:
         return redirect('recognizer:login')
     
@@ -217,7 +231,7 @@ def home_view(request):
         except:
             pass
         teacher_user = TeacherProfileModel.objects.get(id=teacher)
-        if request.user == teacher_user.user:
+        if user == teacher_user.user:
             teacher_user.ip1 = ip1
             teacher_user.save()
             
@@ -239,10 +253,11 @@ def home_view(request):
         lecture_object = LectrueModel.objects.get(id=lecture)
         
         try:
-            o = teacher_user.change_website_objects.all().count()
-            c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user).order_by('id').last()
+            # o = teacher_user.change_website_objects.all().count()
+            o = lecture_object.change_website_objects_lecture.all().count()
+            c  = ChangeWebsiteCount.objects.filter(teacher=teacher_user, lecture=lecture_object).order_by('id').last()
             context['recognize'] = c.recognize
-        except Exception as e:
+        except:
             o = 0
             context['recognize'] = False
             
@@ -261,44 +276,43 @@ def home_view(request):
         if o%2==0:
 
             try:
-                user = UserProfile.objects.get(user=request.user)
                 
                 gender = user.gender
                 details = {
                 'gender':gender,
-                'college':user.college,
-                'branch':user.branch,
-                'username':user.user.username,
-                'unique_id':user.unique_id,
-                'user':user,
-                'superuser':request.user.is_superuser,
+                'college':user_profile.college,
+                'branch':user_profile.branch,
+                'username':user.username,
+                'unique_id':user_profile.unique_id,
+                'user':user_profile,
+                'superuser':user.is_superuser,
                 }
 
             except Exception as e:
                 details = None
             
             frame, login_proceed = get_face_detect_data(file, details)
-            ret, buf = cv2.imencode('.jpg', frame)
+            _, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
             if login_proceed:
                 context['login_detail'] = True
-                user.login_proceed = login_proceed
+                user_profile.login_proceed = login_proceed
                 
-                instance = LoginDetails.objects.create(user=request.user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user.enrollment_number)
+                instance = LoginDetails.objects.create(user=user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user_profile.enrollment_number)
                 instance.processed_img.save("output.jpg", image)
                 
-                user.save()
+                user_profile.save()
                 
                 context['login_details_form'] = login_details_form
                 
-                messages.success(request, f'Your face was recognized as {request.user.username} - {user.enrollment_number}')
+                messages.success(request, f'Your face was recognized as {user.username} - {user_profile.enrollment_number}')
                 url = reverse('recognizer:home')
                 
                 return JsonResponse(status = 302 , data = {'success' : url })
             else:
                 context['login_detail'] = False
-                user.login_proceed = login_proceed
-                user.save()
+                user_profile.login_proceed = login_proceed
+                user_profile.save()
                 
                 context['login_details_form'] = login_details_form
             
@@ -323,6 +337,8 @@ def load_lectures(request):
 
 def succsess(request):
     return HttpResponse("success")
+
+
 
 
 def login_view(request):
@@ -362,6 +378,7 @@ def login_view(request):
     return render(request, 'recognizer/login.html', context=context)
 
 
+from teacher.tasks import create_student
 
 @user_passes_test(lambda u: u.is_staff)
 def signup_view(request):
@@ -370,28 +387,25 @@ def signup_view(request):
         
     }
     context['form'] = signup_form
-    
-    
+    teacher_profile = request.user.teacher_profile.all().first()
     if request.POST :
         if signup_form.is_valid():
             username = signup_form.cleaned_data.get('username')
             email = signup_form.cleaned_data.get('email') or None
             password = signup_form.cleaned_data.get('password')
+            gender = None
+            enrollment_number = None
+            
             
             user = authenticate(request, username=username, password=password)
             if user is None:
-                user = User.objects.create(username=username, email=email)
-                user.set_password(password)
-                user.save()
-                # login(request, user=user)
+                
+                create_student(username, password, email, gender, enrollment_number, teacher_profile, email)
+                
                 
                 signup_form = AuthenticationForm(request.POST or None)
                 context['form'] = signup_form
-                messages.success(request, "Sign up Sucsessful")
-                
-                user_profile = UserProfile.objects.get(user=user)
-                # uqid = get_uqid(request=request)
-                # request.session['user_pk'] = user_profile.pk
+
                 return redirect(reverse('recognizer:signup'))
             else:
                 messages.error(request, 'User already exists!')
@@ -543,16 +557,20 @@ def delete_profile(request, pk=None):
     try:   
         user_profile = UserProfile.objects.get(pk=pk)
         user = user_profile.user
+        teacher_profile = request.user.teacher_profile.all().first()
     except:
         return reverse("recognizer:home")
     
     if (request.user.is_staff and user_profile.user.is_staff) and (request.user.is_staff != user_profile.user.is_staff):
         messages.error(request, "Is teacher cannot delete account!")
         return reverse("recognizer:home")
-    if request.user.is_staff:
+    if request.user.is_staff and user_profile.college == teacher_profile.college:
         user_profile.delete()
         user.delete()
         messages.success(request, "Account Deleted!")
+    else:
+        messages.error(request, "In not same college!")
+        return reverse("recognizer:home")
     return reverse("recognizer:home")
 
 
@@ -647,6 +665,16 @@ register = template.Library()
 @register.simple_tag
 def current_pk(user):
     return UserProfile.objects.get(user=user).pk  
+
+def get_teacher(request):
+    return request.user.teacher_profile.all().last()
+
+def get_user_profile(request):
+    return request.user.user_profile
+
+def get_user(request):
+    return request.user
+    
 
 
 

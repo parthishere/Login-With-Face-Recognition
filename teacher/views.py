@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from recognizer.models import UserProfile, TeacherProfileModel, LectrueModel
 from login_details.models import LoginDetails
 from .forms import TeacherUpdateForm, LectureForm
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 @user_passes_test(lambda u: u.is_staff)
@@ -126,9 +127,12 @@ def lecture_list_view(request):
     return render(request, 'teacher/lectures.html', context=context)
 
 
+@login_required(login_url='recognizer:login')
 def lec_detail_view(request, pk=None):
     context = {}
+    print(pk)
     lecture = LectrueModel.objects.get(pk=pk)
+    print(lecture)
     context['lecture'] = lecture
     return render(request, 'teacher/lectures_detail.html', context=context) 
 
@@ -148,10 +152,11 @@ def add_lecture(request):
     
     return render(request, 'teacher/update-teacher-profile.html', context=context)
 
-
+@login_required(login_url='recognizer:login')
 def search_student(request):
     context = {}
     query = request.GET['q']
+    user_profile = request.user.user_profile.all().first()
     qs = UserProfile.objects.filter(
                 Q(user__username__icontains=query) |
                 Q(user__first_name__icontains=query) |
@@ -159,9 +164,16 @@ def search_student(request):
                 Q(user__email__icontains=query) |
                 Q(enrollment_number__icontains=query) |
                 Q(phone_number__icontains=query)
-            ).exclude(user__is_staff=True)
+            ).exclude(user__is_staff=True).filter(college=user_profile.college)
     context['is_student'] = "Student"
     context['objects'] = qs
+    
+    lec_qs = LectrueModel.objects.filter(
+                Q(lecture_name__icontains=query) |
+                Q(teacher__user__username__icontains=query)
+            ).filter(teacher__college=user_profile.college)
+    context['is_lecture'] = "lecture"
+    context['lec_objcets'] = lec_qs
     return render(request, "teacher/students-list.html", context)
 
 @user_passes_test(lambda u: u.is_staff)
@@ -219,6 +231,43 @@ def reset_attendance_of_lecture(request, pk=None):
 def lec_detail(request, pk=None):
     context = {}
     lec = LectrueModel.objects.get(pk=pk)
-    if lec.teacher.user == request.user:
-        context['lecture'] = lec
+    
+    context['lecture'] = lec
     return render(request, "teacher/lecture_detail.html", context)
+
+
+def send_request(request, pk):
+    lecture = LectrueModel.objects.get(pk=pk)
+    user_p = request.user.user_profile.all().first()
+    if not user_p.user.is_staff: 
+        lecture.requested_user.add(user_p)
+    return redirect("teacher:lec_detail", kwargs={'pk':lecture.pk})
+
+@user_passes_test(lambda u: u.is_staff)
+def accept_request(request, user_id ,lec_id):
+    lecture = LectrueModel.objects.get(id=lec_id)
+    user_p = UserProfile.objects.get(pk=user_id)
+    teacher_profile = request.user.teacher_profile.all().first()
+    if teacher_profile == lecture.teacher: 
+        if user_p in lecture.accepted_user.all():
+            if user_p in lecture.requested_user.all():
+                lecture.requested_user.remove(user_p)
+        else:
+            lecture.accepted_user.add(user_p)
+            lecture.requested_user.remove(user_p)
+    return redirect(reverse("teacher:lec-detail", kwargs={'pk':lecture.pk}))
+
+@user_passes_test(lambda u: u.is_staff)
+def decline_request(request, user_id, lec_id):
+    lecture = LectrueModel.objects.get(id=lec_id)
+    user_p = UserProfile.objects.get(pk=user_id)
+    teacher_profile = request.user.teacher_profile.all().first()
+    if teacher_profile == lecture.teacher: 
+        
+        if user_p in lecture.accepted_user.all():
+            lecture.accepted_user.remove(user_p)
+            
+        if user_p in lecture.requested_user.all():
+            lecture.requested_user.remove(user_p)
+            
+    return redirect(reverse("teacher:lec-detail", kwargs={'pk':lecture.pk}))

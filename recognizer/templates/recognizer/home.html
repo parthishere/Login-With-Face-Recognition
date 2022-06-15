@@ -95,14 +95,22 @@ IP address
 {% if request.user.is_staff or request.user in request.user.teacher_profile.all %}
 <hr>
 </br>
+
+{% for lec,lec_count in lectures_with_count.items %}
+{{lec}} : {{lec_count}}
+
 <form method='POST' action="{% url 'recognizer:change-website' %}">
   {% csrf_token %}
-  {% if change_site_count|divisibleby:2 %}
-  <input class='form-control btn btn-outline-danger' type='submit' value='Disable Taking Attendance' name='submit'>
+  <input type='hidden' name='lecture' value='{{ lec }}'>
+  {% if lec_count|divisibleby:2 %}
+  <input class='form-control btn btn-outline-danger' type='submit' value='Disable Taking Attendance of {{lec}}' name='submit'>
   {% else %}
-  <input class='form-control btn btn-outline-success' type='submit' value='Enable Taking Attendance' name='submit'>
+  <input class='form-control btn btn-outline-success' type='submit' value='Enable Taking Attendance of {{lec}}' name='submit'>
   {% endif %}
 </form>
+
+{% endfor %}
+
 <hr>
 </br>
 {% else %}{% endif %}

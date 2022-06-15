@@ -1,8 +1,22 @@
+from secrets import choice
 from django import forms
 
 from login_details.models import LoginDetails
 
 from .models import LectrueModel, TeacherProfileModel, UserProfile
+
+class UserCreateForm(forms.Form):
+    username = forms.CharField()
+    email = forms.EmailField(required=False)
+    enrollment_number = forms.NumberInput()
+    gender = forms.CharField(max_length=1)
+    password = forms.CharField(widget=forms.PasswordInput)
+    
+    def __init__(self, *args, **kwargs):
+        super(AuthenticationForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+    
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField()

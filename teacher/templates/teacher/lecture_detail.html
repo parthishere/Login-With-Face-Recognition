@@ -4,6 +4,7 @@
 <br>
 <br>
 <center>
+    {{ lecture }}
     <h5>
 {{ lecture.lecture_name }} by {{ lecture.teacher }}
     </h5>
@@ -15,10 +16,36 @@ Semester: {{ lecture.semester }} of branch {{ lecture.branch }}
 </br>
 <hr>
 <hr>
+</center>
 
+</br>
+ACCEPTED STUDENT LIST:
+{% for stud in lecture.accepted_user.all %}
+<a href="{{ stud.get_absolute_url }}">{{ stud.user.username }} {{ stud.email }} {{ stud.enrollment_number }} {{ stud.college }} {{ stud.branch }} </a> &nbsp <a href="{% url 'teacher:decline_req' user_id=stud.pk lec_id=lecture.id %}">Remove</a></br>
+{% endfor %}
 
+</br>
+REQUESTED STUDENT LIST:
+{% for stud in lecture.requested_user.all %}
+<a href="{{ stud.get_absolute_url }}">{{ stud.user.username }} {{ stud.email }} {{ stud.enrollment_number }} {{ stud.college }} {{ stud.branch }}</a>{% if request.user.teacher_profile.all.first == lecture.teacher %}
+<a href="{% url 'teacher:accept_req' user_id=stud.pk lec_id=lecture.id %}">Accept</a> <a href="{% url 'teacher:decline_req' user_id=stud.pk lec_id=lecture.id %}">Decline</a></br>
+{% else %}{% endif %}
+{% endfor %}
+
+</br>
+<hr>
 <center>
+    {% if request.user.is_staff %}
 <a href="{% url "teacher:reset-cnf" pk=lecture.pk %}">
     <button class='btn btn-danger'>Reset Attandace of Lecture</button>
 </a>
+{% else %}
+
+{% if request.user.user_profile.all.first in lecture.requested_user.all or request.user.user_profile.all.first in lecture.accepted_user.all %}
+request sent
+{% else %} <a href="{% url 'teacher:send_request' pk=lecture.pk %}"><button class='btn btn-dark'> Send request</button></a> {% endif %}
+
+{% endif %}
+</center>
+
 {% endblock %}

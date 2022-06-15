@@ -17,6 +17,9 @@ from .views import (
     reset_confirm_view,
     reset_attendance_of_lecture,
     lec_detail,
+    accept_request, 
+    decline_request,
+    send_request,
     
 )
 
@@ -38,4 +41,8 @@ urlpatterns = [
     path('attendance/delete/<int:pk>', delete_attendance, name='del-att'),
     path('reset-attendance/<int:pk>', reset_attendance_of_lecture, name='reset-attendance'),
     path('reset-confirm/<int:pk>', reset_confirm_view, name='reset-cnf'),
+    
+    path('lec/request/<int:pk>', send_request, name='send_request'),
+    path('lec/accept/<int:user_id>/<int:lec_id>', accept_request, name='accept_req'),
+    path('lec/decline/<int:user_id>/<int:lec_id>', decline_request, name='decline_req'),
 ]    

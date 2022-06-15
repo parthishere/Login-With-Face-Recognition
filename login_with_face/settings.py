@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'django_cleanup.apps.CleanupConfig',
+    # 'djcelery',
 ]
 
 # ASGI_APPLICATION = "login_with_face.asgi.application"
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'login_with_face.urls'
@@ -180,3 +182,55 @@ LOGOUT_REDIRECT_URL = '/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+CELERY_accept_content = ['application/json']
+CELERY_result_serializer = 'json'
+CELERY_task_serializer = 'json'
+timezone = 'Asia/Kolkata'
+
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+
+
+
+if DEBUG:
+    MIDDLEWARE += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+    INSTALLED_APPS += (
+        'debug_toolbar',
+    )
+    INTERNAL_IPS = ('127.0.0.1', )
+    import mimetypes
+    mimetypes.add_type("application/javascript", ".js", True)
+    
+    # DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+    def show_toolbar(request):
+        return True
+        
+    DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    "SHOW_TOOLBAR_CALLBACK": show_toolbar,
+    'INSERT_BEFORE': '</head>',
+    'INTERCEPT_REDIRECTS': False,
+    'RENDER_PANELS': True,
+    }
+    

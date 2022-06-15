@@ -145,7 +145,7 @@ class TeacherProfileModel(models.Model):
         ('IT', 'INFORMATION AND TECHNOLOGY'),
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='teacher_profile')
+    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE, related_name='teacher_profile')
     ip1 = models.CharField(null=True, blank=True, max_length=15) 
     ip2 = models.CharField(null=True, blank=True, max_length=15)
 
@@ -155,6 +155,11 @@ class TeacherProfileModel(models.Model):
     company = models.CharField(max_length=100,null=True, blank=True)
     branch = models.CharField(choices=BRANCH_CHOICES,max_length=3, blank=True, null=True)
     login_proceed = models.BooleanField(default=True)
+    
+    add_extra_photo = models.BooleanField(default=False)
+    time_limit = models.BooleanField(default=True)
+    time_in_minutes = models.IntegerField(default=15)
+    
     
     
     def __str__(self):
@@ -184,6 +189,8 @@ class LectrueModel(models.Model):
     teacher = models.ForeignKey(TeacherProfileModel, related_name='lectures', on_delete=models.CASCADE, null=True, blank=True)
     semester = models.CharField(choices=SEMESTER_CHOICES, default='1', max_length=1)
     branch = models.CharField(choices=BRANCH_CHOICES, max_length=5, null=True, blank=True)
+    requested_user = models.ManyToManyField(UserProfile, related_name='requested_lectures', blank=True)
+    accepted_user = models.ManyToManyField(UserProfile, related_name='accepted_lectures', blank=True)
        
     def __str__(self):
         return self.lecture_name
@@ -199,10 +206,13 @@ class LectrueModel(models.Model):
     def get_delete_url(self):
         return reverse("teacher:lec-delete", kwargs={"pk": self.pk})
     
-    
+ 
+from login_details.models import LoginDetails   
 class ChangeWebsiteCount(models.Model):
     recognize = models.BooleanField(default=True)
     teacher = models.ForeignKey(TeacherProfileModel, on_delete=models.CASCADE, null=True, blank=True, related_name='change_website_objects')
+    lecture = models.ForeignKey(LectrueModel, on_delete=models.CASCADE, null=True, blank=True, related_name='change_website_objects_lecture')
+    atendees = models.ManyToManyField(LoginDetails, related_name='sessions', blank=True)
     
     class Meta():
         ordering = ['-id']
@@ -263,10 +273,14 @@ pre_save.connect(pre_save_change_website_reciever, sender=ChangeWebsiteCount)
 def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
     try:
         obj = TeacherProfileModel.objects.get(user=instance)
+        user_profile = UserProfile.objects.get(user=instance)
     except:
         obj = None
     if instance.is_staff and obj is None:
         obj = TeacherProfileModel.objects.create(user=instance)
+        obj.college = user_profile.college
+        obj.branch = user_profile.branch
+        obj.save()
 
 
 post_save.connect(user_post_save_receiver_for_teacher, sender=User)

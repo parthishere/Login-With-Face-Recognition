@@ -18,7 +18,7 @@
 </center>
 {% else %}
 <center>
-    <b><h4> Teachers List</b></h4>
+    <b><h4> Lecture List</b></h4>
     </center>
 {% endif %}
 
@@ -37,6 +37,30 @@
           </div>
           <div class="col-sm-9 text-secondary">
             <a href={{ object.get_absolute_url }}>{{ object }} </a><a style="float:right;" href={{ object.get_delete_url }}><b><font color='red'> X </font></b></a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
+
+{% for object in lec_objcets %}
+<center>
+
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">Lecture</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href="{% url "teacher:lec-detail" pk=object.pk %}">{{ object.lecture_name }}</a> of Branch: {{ object.branch }}, Semester: {{ object.semester }} </a> &nbsp&nbsp 
           </div>
         </div>
     </div>

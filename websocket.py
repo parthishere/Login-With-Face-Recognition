@@ -55,3 +55,11 @@ if __name__ == "__main__":
     myIP = socket.gethostbyname(socket.gethostname())
     print ('*** Websocket Server Started at %s***' % myIP)
     tornado.ioloop.IOLoop.instance().start()
+    
+    
+    
+# django celery beat
+# redis
+# celery
+# eventlet
+# celery -A login_with_face worker -l info -P eventlet
