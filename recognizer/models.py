@@ -46,6 +46,7 @@ def unique_id_generator(instance):
         return new_id
 
 
+    
 
 
 class UserProfile(models.Model):
@@ -77,7 +78,7 @@ class UserProfile(models.Model):
         ('6', '6th Semester'),
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_profile', unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_profile')
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
     image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
     bit64_image = models.TextField(null=True, blank=True)
@@ -145,7 +146,7 @@ class TeacherProfileModel(models.Model):
         ('IT', 'INFORMATION AND TECHNOLOGY'),
     )
     
-    user = models.ForeignKey(User, unique=True, on_delete=models.CASCADE, related_name='teacher_profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile')
     ip1 = models.CharField(null=True, blank=True, max_length=15) 
     ip2 = models.CharField(null=True, blank=True, max_length=15)
 
@@ -165,6 +166,10 @@ class TeacherProfileModel(models.Model):
     def __str__(self):
         name = self.user.username + str(self.pk)
         return "{} {}".format(self.user.username, self.pk)
+    
+    @property
+    def get_user_profile(self):
+        return self.user
 
     
 
@@ -205,7 +210,11 @@ class LectrueModel(models.Model):
     @property
     def get_delete_url(self):
         return reverse("teacher:lec-delete", kwargs={"pk": self.pk})
-    
+ 
+ 
+class ChangeWebsiteCountManager(models.Manager):
+    def get_teacher_userprofile(self, instance):
+        instance.teacher
  
 from login_details.models import LoginDetails   
 class ChangeWebsiteCount(models.Model):
@@ -219,6 +228,8 @@ class ChangeWebsiteCount(models.Model):
         
     def __str__(self):
         return str(self.pk)
+    
+    
 
 
 

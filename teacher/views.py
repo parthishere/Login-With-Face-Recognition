@@ -7,19 +7,32 @@ from .forms import TeacherUpdateForm, LectureForm
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
+
+def get_teacher(request):
+    return request.user.teacher_profile.all().last()
+
+def get_user_profile(request):
+    return request.user.user_profile
+
+def get_user(request):
+    return request.user
+
 # Create your views here.
-@user_passes_test(lambda u: u.is_staff)
+
 def profile_view(request):
     context={}
     try:
-        teacher = TeacherProfileModel.objects.get(user=request.user)
+        user = get_user(request)
+        user_profile = UserProfile.objects.get(user=user)
+        teacher = TeacherProfileModel.objects.get(user=user)
         context['teacher'] = teacher
-        context['user_profile'] = teacher.user.user_profile.all().first()
+        context['user_profile'] = user_profile
         change_site_count = teacher.change_website_objects.all().count()
         context['change_site_count'] = change_site_count
         
-        context['students_attended_teachers_lecture'] = LoginDetails.objects.filter(teacher__user=request.user).order_by('-login_date').order_by('-login_time')
-    except:
+        context['students_attended_teachers_lecture'] = LoginDetails.objects.filter(teacher__user=user).order_by('-login_date').order_by('-login_time')
+    except Exception as e:
+        print(e)
         return redirect('recognizer:logout-cnf')
     
     return render(request, 'teacher/index.html', context=context)
@@ -29,15 +42,18 @@ def profile_view(request):
 def profile_list_view(request):
     context = {}
     try:
-        teacher = TeacherProfileModel.objects.get(user=request.user)
+        user = get_user(request)
+        user_profile = UserProfile.obejcts.get(user=user)
+        teacher = TeacherProfileModel.objects.get(user=user)
         context['teacher'] = teacher
-        context['user_profile'] = teacher.user.user_profile.all().first()
+        context['user_profile'] = user_profile
         
         # teachers_user_profiles = TeacherProfileModel.objects.all().values('user')
         students = UserProfile.objects.filter(college=teacher.college, branch=teacher.branch).exclude(user__is_staff=True)
         context['objects'] = students
         context['is_student'] = "Student"
-    except:
+    except Exception as e:
+        print(e)
         return redirect('recognizer:logout-cnf')
     
     return render(request, 'teacher/students-list.html', context=context)

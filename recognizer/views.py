@@ -10,6 +10,8 @@ import boto3, urllib
 
 import requests
 
+from teacher.models import CityCollegeModel, CollegeBranchModel, CollegeModel
+
 from .models import LectrueModel, TeacherProfileModel, UserProfile, User, ChangeWebsiteCount
 from .forms import FirstTimeUserProfileForm, SecondTimeUserProfileForm, AuthenticationForm, LectureDetailsForm, UserProfileImageForm
 from .recognizer import RecognizerClass, Recognizer 
@@ -210,9 +212,11 @@ def home_view(request):
         
         user_profile = UserProfile.objects.get(user=user)
         
+        context['request_user'] = user
         context['user'] = user_profile
         context['teacher'] = is_teacher
-        context['teacher_user'] = teacher
+        if is_teacher:
+            context['teacher_user'] = teacher
         context['premium_data'] = LoginDetails.objects.filter(user=user)
     except:
         return redirect('recognizer:login')
@@ -337,6 +341,21 @@ def load_lectures(request):
 
 def succsess(request):
     return HttpResponse("success")
+
+def load_cities(request):
+    distric_id = request.GET.get('district')
+    cities = CityCollegeModel.objects.filter(district_id=distric_id).all()
+    return render(request, 'recognizer', {'cities':cities})
+
+def load_colleges(request):
+    city_id = request.GET.get('city')
+    colleges = CollegeModel.objects.filter(city_id=city_id).all()
+    return render(request, 'recognizer', {'colleges':colleges})
+
+def load_branches(request):
+    college_id = request.GET.get('college')
+    branches = CollegeBranchModel.objects.filter(college_id=college_id).all()
+    return render(request, 'recognizer', {'branches':branches})
 
 
 
