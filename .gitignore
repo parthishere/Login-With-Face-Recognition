@@ -22,29 +22,9 @@ atlassian-ide-plugin.xml
  
 develop-eggs/ 
 
-downloads/ 
-eggs/ 
-.eggs/ 
-lib/ 
-lib64/ 
-parts/ 
-sdist/ 
-var/ 
-
-*.egg-info/ 
-.installed.cfg 
-*.egg 
-*.manifest 
-*.spec 
-
-
-
 # Jupyter Notebook 
 .ipynb_checkpoints 
 
-
-# celery 
-celerybeat-schedule.* 
 
 
 
