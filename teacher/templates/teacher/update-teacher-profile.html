@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+
+{% block body_block %}
+
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+{% endfor %}
+<br>
+</br>
+<div class='container-sm'>
+<form method='POST' class='form-control' enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+<input class='form-control btn btn-primary' type='submit' value='submit'>
+<br>
+</br>
+<hr>
+</form>
+</div>
+
+
+{% endblock %}
+

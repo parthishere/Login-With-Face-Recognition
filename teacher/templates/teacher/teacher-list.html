@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+
+
+{% if is_student %}
+<center>
+<b><h4> Student List</b></h4>
+</center>
+{% else %}
+<center>
+    <b><h4> Teachers List</b></h4>
+    </center>
+{% endif %}
+
+<hr>
+{% for object in objects %}
+<center>
+  {{ object }}
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">{{ is_student }}{{ is_teacher }}</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href={{ object.teacher_profile.all.first.get_absolute_url }}>{{ object.teacher_profile.all.first }}  </a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
+        
+
+
+{% endblock %}

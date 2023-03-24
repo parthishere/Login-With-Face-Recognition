@@ -1,0 +1,147 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap");
+* {
+  margin: 0px;
+  padding: 0;
+  box-sizing: border-box; }
+
+body {
+  font-family: "Poppins", Courier, monospace;
+  line-height: 1.7;
+  padding: 0.2em;
+  background-color: #f1f0eb; }
+
+a {
+  text-decoration: none;
+  color: #000; }
+  a:link {
+    text-decoration: none;
+    color: #000; }
+  a:visited {
+    text-decoration: none;
+    color: #000; }
+  a:hover {
+    color: #d79922;
+    transform: scale(1.2); }
+
+.mybutton {
+  color: #000;
+  background-color: #c5cbe3;
+  border-radius: 100px;
+  border: 1px solid black;
+  padding: 0.7em 2em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+  transition: all 0.3s ease-in; }
+  .mybutton:hover {
+    background-color: #4056a1;
+    color: white;
+    transform: scale(1.1); }
+  .mybutton.vhmax {
+    max-width: 75%;
+    text-transform: capitalize; }
+  .mybutton.danger {
+    letter-spacing: 0px;
+    font-size: medium;
+    font-weight: 300;
+    background-color: #f13c20;
+    color: #fff;
+    border: 2px solid #4056a1; }
+  .mybutton.success {
+    letter-spacing: 0px;
+    font-weight: 300;
+    font-size: medium;
+    background-color: #74a48c;
+    color: #fff;
+    border: 2px solid #4056a1; }
+  .mybutton.smallbutton {
+    height: fit-content;
+    width: fit-content;
+    font-size: small; }
+
+.ip-address {
+  margin-top: 0.5em;
+  text-align: center;
+  letter-spacing: 2px;
+  display: flex;
+  font-size: smaller;
+  justify-content: space-around; }
+
+.form-teacher {
+  margin-top: 1.5em;
+  display: flex;
+  justify-content: space-around;
+  padding: 1.5em;
+  font-size: small;
+  border-top: 1px solid #d79922; }
+  .form-teacher span {
+    margin-top: 0.5em;
+    text-align: center;
+    letter-spacing: 2px; }
+  .form-teacher .ip1-text {
+    height: fit-content;
+    padding: 5px;
+    border-radius: 10px; }
+    .form-teacher .ip1-text::placeholder {
+      letter-spacing: 2px;
+      padding: 4px;
+      color: black;
+      border-radius: 20px;
+      border-color: #28b485; }
+
+form#myAwesomeForm {
+  display: grid;
+  grid-template-areas:
+  "a b c d";}
+.video-form{
+  grid-area :a
+}
+.canvas-form{
+  grid-area: b;
+}
+
+.img_input{
+  grid-area: c;
+}
+
+
+#video {
+  border: 1px solid #28b485;
+  box-shadow: 2px 2px 3px #28b485;
+  width: 310px;
+  height: 230px; }
+
+#photo {
+  border: 1px solid #28b485;
+  box-shadow: 2px 2px 3px #28b485;
+  width: 320px;
+  height: 240px; }
+
+#canvas {
+  display: none; }
+
+.camera {
+  width: 340px;
+  display: inline-block; }
+
+.output {
+  width: 310px;
+  display: inline-block; }
+
+#startbutton {
+  display: block;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  bottom: 32px;
+  border-radius: 100px;
+  background-color: rgba(0, 150, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0px 0px 1px 2px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  color: white; }
+
+.contentarea {
+  font-size: 16px;
+  font-family: "Lucida Grande", "Arial", sans-serif;
+  width: 760px; }

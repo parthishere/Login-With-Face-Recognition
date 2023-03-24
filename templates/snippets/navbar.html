@@ -1,0 +1,67 @@
+{% load static %}
+<nav>
+  
+</nav>
+<nav class="navbar sticky-top fixed-top navbar-expand-lg navbar-dark" style="background-color:#4056a1;color:black">
+  <div class="container-fluid">
+  <a class="navbar-brand" href="{% url 'recognizer:home' %}">
+  <img src="{% static 'images/favicon.png' %%}" width="30" height="30" class="d-inline-block align-center" alt="">
+   <span class="navbar-brand mb-0 h1" style="color:#white;">LogUP</span></a>
+   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-">
+      <li class="nav-item active">
+        <a class="nav-link" href="{% url 'recognizer:home' %}">Home <span class="sr-only"></span></a>
+      </li>
+
+
+      
+      <li class="nav-item active">
+        {% if upk %}
+          <a class="nav-link" href="{% url 'recognizer:profile' pk=upk %}">See Profile</a>
+        {% else %} {% endif %}  
+      </li>
+
+
+      {% if request.user.is_teacher %}
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'teacher:dashboard' %}">Dashboard</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'teacher:session-requests' %}">Session Requests</a>
+        </li>
+      {% else %} {% endif %}
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          Account
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          {% if not request.user.is_authenticated %}
+            <li><a class="dropdown-item" href="{% url 'recognizer:login' %}">Login</a></li>
+            <li><a class="dropdown-item" href="{% url 'recognizer:signup' %}">Sign-Up</a></li>
+          {% else %}
+          <li>
+          <form class="d-flex" method='GET' action="{% url 'teacher:search-lec' %}">
+            <input class="form-control" type="search" name='q' placeholder="Lecture Search" aria-label="Search" value='{{ request.GET.q }}' >
+            <button class="btn btn-fill" type="submit" >Search</button>
+          </form>
+          <li>
+            <li><a class="dropdown-item" href="{% url 'recognizer:logout-cnf' %}">Logout</a></li>
+          {% endif %}
+            <div class="dropdown-divider"></div>
+        </ul>
+      </li>
+       
+    </ul>
+
+    <form class="d-flex" method='GET' action="{% url 'teacher:search-stud' %}">
+      <input class="form-control" type="search" name='q' placeholder="Search" aria-label="Search" value='{{ request.GET.q }}' style="margin-left:2px;border-color:#d79922;color:#d79922;">
+      <button class="mybutton smallbutton" type="submit" >Search</button>
+    </form>
+  </div>
+</div>
+</nav>

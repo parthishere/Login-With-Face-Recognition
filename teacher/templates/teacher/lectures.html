@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+
+
+{% for object in objects %}
+<center>
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+          <br>
+          <center>
+              <b><h4> Lecture by {{ object.teacher.user.username | upper }}</b></h4>
+              {{ teacher.username }}
+              {{ teacher.college }}
+              {{ teacher.branch }}
+              </center>
+              <br>
+          
+          <hr>
+          <br>
+          <div class="col-sm-3">
+            <h6 class="mb-0">Lecture</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href="{% url "teacher:lec-detail" pk=object.pk %}">{{ object.lecture_name }}</a> of Branch: {{ object.branch }}, Semester: {{ object.semester }} </a> &nbsp&nbsp
+            <a "padding-left:30px;" href="{% url 'teacher:lec-update' pk=object.pk %}">Update</a>
+            <a style="float:right;" href={{ object.get_delete_url }}><b><font color='red'> X </font></b></a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
+
+
+{% endblock %}

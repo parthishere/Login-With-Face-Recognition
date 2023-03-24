@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+<br>
+<br>
+<center>
+    {{ session }}
+    <h5>
+Session of {{ session.lecture.lecture_name }} by {{ session.teacher }}
+    </h5>
+    <br>
+    
+Session Semester: {{ session.lecture.semester }} of branch {{ session.lecture.branch }}
+<br>
+<br>
+</br>
+<hr>
+<hr>
+</center>
+
+</br>
+Presesnt Student List in session:
+{% for stud in lecture.atendees.all %}
+<a href="{{ stud.get_absolute_url }}">{{ stud.user.username }} {{ stud.email }} {{ stud.enrollment_number }} {{ stud.college }} {{ stud.branch }} </a> 
+{% if user.user_profile == lecture.teacher %}
+&nbsp <a href="{% url 'teacher:decline_req' user_id=stud.pk lec_id=lecture.id %}">Remove</a></br>
+{% else %}{% endif %}
+{% endfor %}
+
+</br>
+
+
+Requested Student List:
+{% for stud in lecture.requested_users.all %}
+<a href="{{ stud.get_absolute_url }}">{{ stud.user }} {{ stud.email }} {{ stud.enrollment_number }} {{ stud.branch }}</a>
+{% if user.user_profile == lecture.teacher %}
+<a href="{% url 'teacher:accept_req' user_id=stud.pk lec_id=lecture.id %}">Accept</a> <a href="{% url 'teacher:decline_req' user_id=stud.pk lec_id=lecture.id %}">Decline</a></br>
+{% else %}{% endif %}
+{% endfor %}
+
+</br>
+<hr>
+<center>
+    {% if user.is_teacher %}
+<a href="{% url "teacher:session-delete" pk=session.pk %}">
+    <button class='btn btn-danger'>Delete Session and Attendance</button>
+</a>
+
+<a href="{% url "teacher:session-update" pk=session.pk %}">
+    <button class='btn btn-success'>Update Session</button>
+</a>
+
+
+<form id="sessionForm" method='POST' action="{% url 'recognizer:change-website' %}"  data-url="{% url 'recognizer:change-website' %}">   
+    {% csrf_token %}
+    <input type='hidden' name='next' value={{ request.get_uri }}>
+    <input type='hidden' name='lecture' value='{{ lecture.pk }}'>
+    <input id="changeSession" class='mybutton vhmax {% if lecture.allow_recognize %}danger{% else %}success{% endif %}' type='submit' value='{% if lecture.allow_recognize %}Disable{% else %}Enable{% endif %} Taking Attendance of {{lecture.lecture_name}}, code: {{ lecture.code }}' name='submit'>
+</form>
+
+
+{% else %}
+
+{% if user.user_profile in lecture.requested_user.all or user.user_profile in lecture.accepted_user.all %}
+request sent
+{% else %} <a href="{% url 'teacher:send_request' pk=lecture.pk %}"><button class='btn btn-dark'> Send request</button></a> {% endif %}
+
+{% endif %}
+</center>
+
+{% endblock %}

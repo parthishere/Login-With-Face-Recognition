@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+
+{% for message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <b><center>{{ message }}</center> </b>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+<center> <h1> Create Account </h1>
+
+<p> Allready have an account, go to <a href="{% url 'recognizer:login' %}">Login</a></center>
+<div class='container-sm'>
+<form class='form-control' method='POST' >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+    <input type='submit' class='btn btn-dark'>
+</form>
+</div>
+
+
+
+{% endblock %}

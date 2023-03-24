@@ -1,0 +1,48 @@
+{
+    "data":[
+        {
+            "user": 5,
+            "gender": "F",
+            "distict": 2,
+            "college": 1,
+            "branch": 1,
+            "enrollment_number": "12345667"
+        },
+
+        {
+            "user": 6,
+            "gender": "M",
+            "distict": 2,
+            "college": 1,
+            "branch": 1,
+            "enrollment_number": "12345667"
+        },
+
+        {
+            "user": 7,
+            "gender": "M",
+            "distict": 2,
+            "college": 1,
+            "branch": 1,
+            "enrollment_number": "12345667"
+        },
+
+        {
+            "user": 8,
+            "gender": "M",
+            "distict": 2,
+            "college": 1,
+            "branch": 1,
+            "enrollment_number": "12345667"
+        },
+
+        {
+            "user": 9,
+            "gender": "M",
+            "distict": 2,
+            "college": 1,
+            "branch": 1,
+            "enrollment_number": "12345667"
+        }
+    ]
+}

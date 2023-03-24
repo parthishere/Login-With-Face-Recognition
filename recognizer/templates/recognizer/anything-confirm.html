@@ -1,0 +1,34 @@
+ {% extends 'base.html' %} 
+
+{% block body_block %}
+<center>
+<br>
+</br>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  {{ view }} ??
+</button>
+</center>
+<br>
+<hr>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{ view }} ??</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        once you logged out you have again recognize your face!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="{% url 'recognizer:logout' %}"><button type="button" class="btn btn-primary"}>LogOut??</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

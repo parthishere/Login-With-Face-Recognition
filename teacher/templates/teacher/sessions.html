@@ -1,0 +1,47 @@
+{% extends "teacher/base.html" %}
+{% load static %}
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block links %}
+  <!-- Custom styles for this template-->
+  <link href="{% static 'css/sb-admin.css' %}" rel="stylesheet">
+{% endblock %}
+
+
+
+{% block body %}
+
+
+
+
+{% for lec in lectures %}
+<div class="col-xl-3 col-sm-6 mb-3">
+    <div class="card text-white bg-warning o-hidden h-100">
+      <div class="card-body">
+        <div class="card-body-icon">
+          <i class="fas fa-fw fa-shopping-cart"></i>
+        </div>
+        <div class="mr-5">{{ lec.lecture_name }}
+          {% if lec.allow_recognize %}
+            <div class="mr-5">Students Can Take Attendance</div>
+                {% else %}
+                <div class="mr-5">Students Can't Take Attendance</div>
+            {% endif %}
+        </div>
+      </div>
+      <form method='POST' id='myForm{{lec.id}}' action="{% url 'recognizer:change-website' %}">
+        <input type='hidden' name='next' value="{{ request.get_full_path }}">
+        <input type='hidden' name="lecture" value={{ lec.pk }}>
+        {% csrf_token %}
+      </form>
+      <a class="card-footer text-white clearfix small z-1" onclick="document.getElementById('myForm{{lec.id}}').submit();">
+        <span class="float-left">Change</span>
+        <span class="float-right">
+          <i class="fas fa-angle-right"></i>
+        </span>
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% endblock %}

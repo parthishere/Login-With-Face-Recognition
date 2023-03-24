@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+
+
+{% if requests.change_website_objects %}
+{% for session in requests.change_website_objects.all %}
+    {% if forloop.first %}
+    <b><h4> Requests List</b></h4>
+    {% else%}{% endif %}
+    {% if session.requested_user %}
+    {% for up in session.requested_user %}
+        {% if forloop.first %}
+        Session : {{ session.name }} - on {{ session.timestamp }}
+        {% else %}{% endif %}
+
+        <center>
+        <div class="col-md-8">
+            
+            <div class="card mb-3">
+                
+            <div class="card-body">
+                <div class="row">
+                    
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{{ up.user.username }}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    <a href={{ up.get_absolute_url }}>{{ up }} </a>
+                </div>
+
+                <a href="{% url 'teacher:accept_req' user_id=stud.pk lec_id=lecture.id %}">Accept</a> <a href="{% url 'teacher:decline_req' user_id=stud.pk lec_id=lecture.id %}">Decline</a></br>
+            
+                </div>
+            </div>
+        </div>
+        </div>
+                <hr>
+        {% endfor %}
+        {% endif %}
+{% endfor %}
+{% endif %}
+
+
+    
+
+
+        
+
+
+{% endblock %}

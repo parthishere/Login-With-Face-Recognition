@@ -1,0 +1,201 @@
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/variables";
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap");
+
+$primary-background: #f1f0eb;
+$primary-mati: #d79922;
+$primary-mati-light: #efe2ba;
+$primary-red: #f13c20;
+$primary-blue: #4056a1;
+$priamry-blue-light: #c5cbe3;
+$color-black: #000;
+$colour-black-light: rgb(49, 49, 49);
+$color-white: #fff;
+$color-white-light: #f2f2f2;
+$color-green:#74a48c;
+
+
+$grid-width: 110rem;
+$gutter-vertical: 8rem;
+$gutter-horizontal: 6rem;
+
+* {
+  margin: 0px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", Courier, monospace;
+  line-height: 1.7;
+  padding: 0.2em;
+  background-color: $primary-background;
+}
+
+a{
+  text-decoration: none;
+  color: $color-black;
+  &:link{
+    text-decoration: none;
+    color: $color-black;
+  }
+  &:visited{
+    text-decoration: none;
+    color: $color-black;
+  }
+
+  &:hover{
+    color:#d79922;
+    transform: scale(1.2);
+    
+  }
+}
+
+
+.mybutton{
+  color: $color-black;
+  background-color: $priamry-blue-light;
+  border-radius: 100px;
+  border: 1px solid black;
+  padding: 0.7em 2em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+  transition: all 0.3s ease-in;
+  &:hover{
+    background-color: #4056a1;
+    color:white;
+    transform: scale(1.1);
+  }
+
+  &.vhmax{
+    max-width:75%;
+    text-transform: capitalize;
+  }
+
+  &.danger{
+    letter-spacing: 0px;
+    font-size: medium;
+    font-weight: 300;
+    background-color: $primary-red;
+    color:$color-white;
+    border: 2px solid $primary-blue;
+  }
+
+  &.success{
+    letter-spacing: 0px;
+    font-weight: 300;
+    font-size: medium;
+    background-color: $color-green;
+    color:$color-white;
+    border: 2px solid $primary-blue;
+  }
+
+  &.smallbutton{
+    height:fit-content;
+    width: fit-content;
+    font-size: small;
+  }
+}
+
+
+.ip-address{
+  margin-top: 0.5em;
+  text-align: center;
+  letter-spacing: 2px;
+  display:flex;
+  font-size: smaller;
+  justify-content: space-around;
+
+}
+
+.form-teacher{
+  margin-top: 1.5em;
+  display:flex;
+  justify-content: space-around;
+  padding: 1.5em;
+  font-size: small;
+  border-top: 1px solid $primary-mati;
+  span{
+    margin-top: 0.5em;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .ip1-text{
+    height:fit-content;
+    padding:5px;
+    border-radius: 10px;
+    &::placeholder{
+      letter-spacing: 2px;
+      padding: 4px;
+      color:black;
+      border-radius: 20px;
+      border-color: #28b485;
+    }
+  }
+  
+}
+
+// #sessionForm{
+
+// }
+
+form#myAwesomeForm{
+  display:flex;
+  justify-content: space-between;
+  background-color: #000;
+}
+ 
+
+
+#video {
+  border: 1px solid #28b485;
+  box-shadow: 2px 2px 3px #28b485;
+  width: 310px;
+  height: 230px;
+}
+
+#photo {
+  border: 1px solid #28b485;
+  box-shadow: 2px 2px 3px #28b485;
+  width: 320px;
+  height: 240px;
+}
+
+#canvas {
+  display: none;
+}
+
+.camera {
+  width: 340px;
+  display: inline-block;
+}
+
+.output {
+  width: 310px;
+  display: inline-block;
+}
+
+#startbutton {
+  display: block;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  bottom: 32px;
+  border-radius: 100px;
+  background-color: rgba(0, 150, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0px 0px 1px 2px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 1);
+}
+
+.contentarea {
+  font-size: 16px;
+  font-family: "Lucida Grande", "Arial", sans-serif;
+  width: 760px;
+}
+

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block body_block %}
+
+{% for message in messages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+
+
+
+{% for std in userprofile %}
+<b><h4> Student List</b></h4>
+<center>
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">{{ std.user.username }}{{ is_teacher }}</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href={{ std.get_absolute_url }}>{{ std }} </a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
+
+{% for tea in teacher %}
+<b><h4> Teacher List</b></h4>
+<center>
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">{{ tea.user.username }}{{ is_teacher }}</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href={{ tea.get_absolute_url }}>{{ tea }} </a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
+
+{% for lec in lectures %}
+<b><h4> Teacher List</b></h4>
+<center>
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">{{ lec.lecture_name }}{{ is_teacher }}</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href={{ lec.get_absolute_url }}>{{ lec }} </a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
+        
+
+
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block css_block %}
+<link rel='stylesheet' href="{% static 'css/style.css' %}">
+{% endblock %}
+
+
+{% block body_block %}
+
+
+<div class="wrapper">
+
+  <div class='message-box'>
+    {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <b><center>{{ message }}</center> </b>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+    {% endif %}
+    <div>
+
+  <div class="ip-address">
+    <p class="ip1">FORWARDED_FOR : {{ user_ip }}</p>
+    <p class="ip2">REMOTE_ADDR : {{ second_user_ip }}</p>
+  </div>
+
+
+  
+
+  <!-- {% comment %} <a href="{% url 'recognizer:redirect_stream' %}">go here</a> {% endcomment %} -->
+  
+  <div class='container-sm'>
+  {% if is_teacher %}
+
+    <form method='POST' id="ipForm" action="{% url 'teacher:ip-update' %}" class="form-teacher">
+
+      <div class="ip-address-form">
+        <span> Your Selected IPs: </span> 
+  
+        <ol>
+          <li id="userIpAddress1"> {{ userprofile.ip_address1 }}</li>
+          <li> {{ userprofile.ip_address2 }}</li>
+        </ol>
+        <br>
+      </div>
+      
+      {% csrf_token %}
+      <div class="form-element">
+        <input type='text' id="ip1_textinput" name='ip1' class="ip1-text" placeholder="IP Address">
+        <button id='submit' type="submit" class="mybutton" id="submit" style="margin:12px;">Submit</button>
+      </div>
+
+    </form> 
+    <div id="loading" style="height:100vh; width:100vw;position:absolute;top:0px;left:0px; background-color:rgba(25, 25, 25, 0.5);">
+
+    </div>
+
+    {% for lec in lectures_list %}
+    {{ lec }}
+    <form id="sessionForm" method='POST' action="{% url 'recognizer:change-website' %}"  data-url="{% url 'recognizer:change-website' %}">   
+      {% csrf_token %}
+      <input type='hidden' name='lecture' value='{{ lec.pk }}'>
+      <input id="changeSession" class='mybutton vhmax {% if lec.allow_recognize %}danger{% else %}success{% endif %}' type='submit' value='{% if lec.allow_recognize %}Disable{% else %}Enable{% endif %} Taking Attendance of {{lec.lecture_name}}, code: {{ lec.code }}' name='submit'>
+    </form>
+
+    {% endfor %}
+    
+  {% else %}
+    <!-- Means User -->
+    {{ userprofile }}
+    {{ user }}
+    {% if userprofile.image %}<!-- recognizer/ajax/lec/ -->
+
+    <div class="form">
+      <form id="myAwesomeForm" method="POST" name="inputForm" enctype='multipart/form-data' data-attendance-url="{% url 'recognizer:data_lec_url' %}" action="{% url 'recognizer:home' %}">
+        <div class="video-form"> 
+          <video id="video">Video stream not available.</video>
+          <button id="startbutton" type="button">Take photo</button>
+        </div>
+        {% csrf_token %}
+        <div class="canvas-form">
+          <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="img_input">
+          <img id="photo" alt="your image" style="margin:12px;">
+          {{ lecture_details_form.as_table }}
+        </div>
+
+        <div class="submit-form">
+          <button id='submit' type="submit" class="btn btn-secondary" id="submit" style="margin:12px; border-radius: 15px;">Submit</button>
+        </div>
+      </form>
+    </div>
+
+    {% else %}{% endif %}
+  {% endif %}
+</div>
+
+
+<script src="{% static 'js/main.js' %}"></script>
+<script>
+  console.log("ok");
+  $( "#loading" ).hide();
+  $("#ipForm").submit(function(e) {
+    console.log("hiiiii");
+    e.preventDefault(); 
+  
+    var form = $(this);
+    var actionUrl = form.attr('action');
+    $( document ).ajaxStart(function() {
+    $( "#loading" ).show();
+  });
+    
+    $.ajax({
+        type: "POST",
+        url: actionUrl,
+        data: form.serialize(), 
+        success: function(data)
+        {
+          $("#userIpAddress1").html($("#ip1_textinput").val()); 
+        }
+    });
+     
+    $(document).ajaxStop(function(){
+      $( "#loading" ).hide();
+      $("#ip1_textinput").val("")
+    });
+    
+  });
+
+
+  {% comment %} $("#sessionForm").submit(function(e) {
+    console.log("hiiiii");
+    e.preventDefault(); 
+  
+    var form = $(this);
+    var actionUrl = form.attr('action');
+    $( document ).ajaxStart(function() {
+      $( "#loading" ).show();
+    });
+    
+    $.ajax({
+        type: "POST",
+        url: actionUrl,
+        data: form.serialize(), 
+        success: function(data)
+        {
+          alert(data); 
+        }
+    });
+    
+    $(document).ajaxStop(function(){
+      $( "#loading" ).hide();
+      window.location.reload();
+    });
+
+  }); {% endcomment %}
+
+  
+</script>
+
+{% endblock %}

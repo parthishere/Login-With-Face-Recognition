@@ -1,0 +1,34 @@
+{
+    "data":[
+        {
+            "id": 5,
+            "username": "vansh",
+            "password": "testpassword",
+            "is_teacher": false
+        },
+        {
+            "id": 6,
+            "username": "krishna",
+            "password": "testpassword",
+            "is_teacher": false
+        },
+        {
+            "id": 7,
+            "username": "prathmesh",
+            "password": "testpassword",
+            "is_teacher": true
+        },
+        {
+            "id": 8,
+            "username": "jhon",
+            "password": "testpassword",
+            "is_teacher": false
+        },
+        {
+            "id": 9,
+            "username": "denis",
+            "password": "testpassword",
+            "is_teacher": true
+        }
+    ]
+}
