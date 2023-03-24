@@ -10,9 +10,9 @@ data/
 .env.dev
 docker-compose.yml
 dockerfile
-facerecog
+face_recog
 package.json
-pakcage-lock.json
+package-lock.json
 websocket.py
 
 # Backup files # 
