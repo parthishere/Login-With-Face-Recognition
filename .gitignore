@@ -14,7 +14,8 @@ face_recog
 package.json
 package-lock.json
 websocket.py
-
+docker/
+certbot/
 # Backup files # 
 *.bak 
 
