@@ -3,8 +3,8 @@ media
 data/
 .dockerignore
 .env.dev
-docker-compose.yml
-dockerfile
+# docker-compose.yml
+# dockerfile
 face_recog
 package.json
 package-lock.json

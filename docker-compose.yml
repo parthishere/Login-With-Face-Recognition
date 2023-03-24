@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    # networks: 
+    #   - redisnet
+
+  web: &web
+    build:
+      context: .
+      dockerfile: dockerfile
+    # command: daphne login_with_face.asgi:application -b 0.0.0.0 -p 8000
+    command: bash -c 'python manage.py collectstatic --no-input && python manage.py migrate && python3 manage.py initadmin && python3 -u manage.py runserver 0.0.0.0:8000'
+    environment:
+      - DEBUG=0      
+    env_file: .env
+    volumes:
+      - static_media:/django/staticfiles
+      - .:/django
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    ports:
+      - "8000:8000"
+      - "443:443" 
+    depends_on:
+      - db
+      - redis       
+
+
+  celeryworker:
+    <<: *web
+    image: celeryworker
+    depends_on:
+      - redis
+      - db
+    ports: []
+    command: celery -A login_with_face worker -l INFO -E
+
+
+
+volumes:
+  postgres_data:
+  redis_volume:
+  static_media:
+
+
+
