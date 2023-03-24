@@ -43,6 +43,7 @@ services:
   celeryworker:
     <<: *web
     image: celeryworker
+    env_file: .env
     depends_on:
       - redis
       - db
