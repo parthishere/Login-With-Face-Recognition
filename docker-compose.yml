@@ -21,7 +21,7 @@ services:
   web: &web
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     # command: daphne login_with_face.asgi:application -b 0.0.0.0 -p 8000
     command: bash -c 'python manage.py collectstatic --no-input && python manage.py migrate && python3 manage.py initadmin && python3 -u manage.py runserver 0.0.0.0:8000'
     environment:

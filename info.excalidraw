@@ -1,0 +1,83 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "id": "HEaDP6VXRDFLv88g8J5lz",
+      "type": "arrow",
+      "x": 349.6000061035156,
+      "y": 217.1999969482422,
+      "width": 335.1999816894531,
+      "height": 4.20001220703125,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "roundness": {
+        "type": 2
+      },
+      "seed": 280954626,
+      "version": 40,
+      "versionNonce": 998142686,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1679828443280,
+      "link": null,
+      "locked": false,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          335.1999816894531,
+          4.20001220703125
+        ]
+      ],
+      "lastCommittedPoint": null,
+      "startBinding": null,
+      "endBinding": null,
+      "startArrowhead": null,
+      "endArrowhead": "arrow"
+    },
+    {
+      "id": "kGqKVX0LRrOiqimB4ui5X",
+      "type": "rectangle",
+      "x": 694.4000244140625,
+      "y": 159.60000610351562,
+      "width": 195.20001220703125,
+      "height": 153,
+      "angle": 0,
+      "strokeColor": "#000000",
+      "backgroundColor": "transparent",
+      "fillStyle": "hachure",
+      "strokeWidth": 1,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "roundness": {
+        "type": 3
+      },
+      "seed": 402469378,
+      "version": 13,
+      "versionNonce": 340019330,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1679828445622,
+      "link": null,
+      "locked": false
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}
