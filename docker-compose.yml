@@ -30,8 +30,6 @@ services:
     volumes:
       - static_media:/django/staticfiles
       - .:/django
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
     ports:
       - "8000:8000"
       - "443:443" 
