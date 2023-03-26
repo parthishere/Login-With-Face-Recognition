@@ -1,4 +1,3 @@
-# Start with a base image
 FROM python:3.9
 ENV PYTHONBUFFERED=1
 ENV REDIS_HOST "redis"
