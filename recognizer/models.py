@@ -62,7 +62,7 @@ class UserProfile(models.Model):
     
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_profile')
     unique_id = models.CharField(null=True, blank=True, max_length=120) 
-    image = models.ImageField(upload_to=user_image_path, null=True, blank=True)
+    image = models.ImageField(upload_to=user_image_path, null=True, blank=True, max_length=500)
     about = models.CharField(max_length=30, null=True, blank=True)
     gender = models.CharField(choices=GENDER_CHOICES, max_length=2)
     district = models.ForeignKey(DistrictCollege, on_delete=models.CASCADE, null=True, blank=True)

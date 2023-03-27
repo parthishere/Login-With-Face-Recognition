@@ -9,10 +9,9 @@ WORKDIR /django
 COPY requirements.txt requirements.txt
 
 # Install the dependencies
-RUN pip install cmake
-RUN pip install pandas
-RUN pip3 install opencv-python-headless
-RUN pip install --no-cache-dir -r requirements.txt 
+RUN pip install cmake pandas opencv-python-headless && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apt-get install libpq-dev libssl-dev openssl
 
 # Copy the source code to the container
 COPY . .

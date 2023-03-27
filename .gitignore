@@ -12,7 +12,13 @@ websocket.py
 docker/
 certbot/
 /data
-
+key.pem
+cert.pem
+nginx
+ssh
+ssh/
+certbot.sh
+nginx.conf
 
 # JIRA plugin
 atlassian-ide-plugin.xml
