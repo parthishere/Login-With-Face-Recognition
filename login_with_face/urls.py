@@ -33,7 +33,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('recognizer.urls', namespace='recognizer')),
     path('teacher/', include('teacher.urls', namespace='teacher')),
-    # path("chat/", include("chat.urls", namespace="chat")),
+    path("chat/", include("chat.urls", namespace="chat")),
     
     path('api/auth/', include('dj_rest_auth.urls')),
     

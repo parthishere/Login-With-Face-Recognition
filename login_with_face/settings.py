@@ -33,7 +33,8 @@ if os.path.isfile(dotenv_file):
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ['DEBUG']
+
 
 ALLOWED_HOSTS = ['*']
 
@@ -111,8 +112,8 @@ TEMPLATES = [
 ]
 
 
-# ASGI_APPLICATION = "login_with_face.asgi.application"
-WSGI_APPLICATION = "login_with_face.wsgi.application"
+ASGI_APPLICATION = "login_with_face.asgi.application"
+# WSGI_APPLICATION = "login_with_face.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 

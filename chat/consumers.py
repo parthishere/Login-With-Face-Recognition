@@ -1,6 +1,4 @@
 from channels.consumer import AsyncConsumer
-from concurrent.futures import thread
-from .models import Thread
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db.models import Count, F, Value
