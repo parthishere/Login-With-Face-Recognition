@@ -16,7 +16,8 @@ from .views import (
     # login_with_face_part2, # login with recognizer Class
     # login_with_face_part3, # login with part 3 which consists of all the nessecity things inside on function!
     # test_frame
-    export_users_xls,
+    export_users_xls_lecture,
+    export_users_xls_session,
     enable_disable_session_view,
     load_lectures,
     just_a_function,
@@ -48,7 +49,8 @@ urlpatterns = [
     path('profile/image/<int:pk>/update', update_profile_image_view, name='update-img-profile'),
     path('login-with-face', login_with_face, name='login-with-face'),
     path('change-session', enable_disable_session_view, name='change-website'),
-    path('export-attendance', export_users_xls, name='export'),
+    path('export-attendance/<int:lecture_id>', export_users_xls_lecture, name='export-lec'),
+    path('export-attendance/<int:session_id>', export_users_xls_session, name='export-ses'),
     path("succsess/", succsess, name="sus"),
     path('profile/<int:pk>/attended-lectures', lecture_details, name="stud-lectures"),
     # path('facecam-feed', facecam_feed, name='feed_stream'),

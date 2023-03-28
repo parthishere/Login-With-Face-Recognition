@@ -366,7 +366,7 @@ def search_lectures(request):
     qs2 = LectrueModel.objects.select_related("teacher").filter(
         Q(lecture_name__icontains=lecture)).filter(college=request.user.user_profile.college)
     qs = LectrueModel.objects.select_related("teacher").filter(Q(lecture_name__icontains=lecture) | Q(
-        code__contains=lecture)).filter(college=request.user.user_profile.college)
+        code__icontains=lecture)).filter(college=request.user.user_profile.college)
     print(qs)
     print(qs2)
     return render(request, "teacher/lectures.html", {"objects": qs})

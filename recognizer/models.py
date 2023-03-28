@@ -285,6 +285,17 @@ def lecture_pre_save_reciver(sender, instance, *args, **kwargs):
         
 pre_save.connect(lecture_pre_save_reciver, sender=LectrueModel)
 
+
+def session_pre_save_reciver(sender, instance, *args, **kwargs):
+    if not instance.teacher.user.is_teacher:
+        raise Exception("selected user is not teacher")     
+    if instance.pk is None:
+        name = get_session_name(teacher=instance.teacher, lecture=instance.lecture)
+        instance.name = name
+        
+        
+pre_save.connect(session_pre_save_reciver, sender=SessionAttendanceModel)
+
 # def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
 #     if instance.is_staff and instance.is_teacher is False:
 #         instance.is_teacher = True

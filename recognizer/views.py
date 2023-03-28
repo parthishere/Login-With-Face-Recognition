@@ -44,8 +44,8 @@ def check(request):
     return render(request, "base.html", {"user": user})
 
 
-@user_passes_test(lambda u: u.is_staff)
-def export_users_xls(request):
+@user_passes_test(lambda u: u.is_teacher)
+def export_users_xls_session(request, session_id):
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
 
@@ -72,7 +72,7 @@ def export_users_xls(request):
     format1 = 'D-MMM-YY'
     format2 = 'h:mm:ss AM/PM'
 
-    columns = ['Enrollment number', 'User', 'Authenticated user', 'Teacher',
+    columns = ['Session Name', 'Enrollment number', 'User', 'Authenticated user', 'Teacher',
                'Lecture', 'Login date', 'Login time', "Authenticated Images"]
 
     for col_num in range(len(columns)):
@@ -81,16 +81,22 @@ def export_users_xls(request):
     # Sheet body, remaining rows
     font_style = xlwt.XFStyle()
     teacher = UserProfile.objects.get(user=request.user)
-    rows = list(LoginDetails.objects.filter(teacher=teacher).values_list('enrollment_number', 'user',
-                'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
+    rows = list(SessionAttendanceModel.objects.get(teacher=teacher, pk=session_id).values_list('name', 'atendees__enrollment_number','user', 'atendees__authenticated_user', 'atendees__teacher', 'atendees__lecture', 'atendees__login_date', 'atendees__login_time', 'atendees__processed_img'))
 
     for row in rows:
+        # columns = ['Enrollment number', 'User', 'Authenticated user', 'Teacher',
+        #        'Lecture', 'Login date', 'Login time', "Authenticated Images"]
+        
+        # rows = list(LoginDetails.objects.filter(teacher=teacher).values_list('enrollment_number', 'user',
+        #         'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
+
+
         row = list(row)
-        user = get_object_or_404(User, id=row[1])
-        row[1] = str(get_object_or_404(User, id=row[1]).username) + \
-            ' ' + str(get_object_or_404(User, id=row[1]).unique_id)  # user
-        row[3] = str(UserProfile.objects.get(id=row[3]).user.username)
-        row[4] = str(LectrueModel.objects.get(id=row[4]).lecture_name) + \
+        user = get_object_or_404(User, id=row[2])
+        row[1] = str(get_object_or_404(User, id=row[2]).username) + \
+            ' ' + str(get_object_or_404(User, id=row[2]).unique_id)  # user
+        row[4] = str(UserProfile.objects.get(id=row[4]).user.username)
+        row[5] = str(LectrueModel.objects.get(id=row[5]).lecture_name) + \
             'by' + \
             str(LectrueModel.objects.get(id=row[4]).teacher.user.username)
 
@@ -98,19 +104,19 @@ def export_users_xls(request):
         ws.row(row_num).height_mismatch = True
 
         for col_num in range(len(row)):
-            if col_num == 5:
+            if col_num == 6:
                 # date
                 style = xlwt.XFStyle()
                 style.num_format_str = format1
                 ws.write(row_num, col_num, row[col_num], style)
 
-            elif col_num == 6:
+            elif col_num == 7:
                 # time
                 style = xlwt.XFStyle()
                 style.num_format_str = format2
                 ws.write(row_num, col_num, row[col_num], style)
 
-            elif col_num == 7:
+            elif col_num == 8:
                 # image
                 path = LoginDetails.objects.filter(teacher=teacher)[
                     row_num-1].processed_img
@@ -140,6 +146,108 @@ def export_users_xls(request):
             else:
                 ws.write(row_num, col_num, row[col_num], body_style)
 
+    wb.save(response)
+    return response
+
+
+
+@user_passes_test(lambda u: u.is_staff)
+def export_users_xls_lecture(request, lecture_id):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Users')
+
+    # Sheet header, first row
+    row_num = 0
+
+    header_font = xlwt.Font()
+    header_font.name = 'Arial'
+    header_font.bold = True
+
+    header_style = xlwt.XFStyle()
+    header_style.font = header_font
+
+    body_font = xlwt.Font()
+    body_font.name = 'Arial'
+    body_font.bold = False
+
+    body_style = xlwt.XFStyle()
+    body_style.font = body_font
+
+    format1 = 'D-MMM-YY'
+    format2 = 'h:mm:ss AM/PM'
+
+    columns = ["Lecture Name", 'Enrollment number', 'User', 'Authenticated user', 'Teacher',
+               'Lecture', 'Login date', 'Login time', "Authenticated Images"]
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], header_style)
+
+    # Sheet body, remaining rows
+    font_style = xlwt.XFStyle()
+    teacher = UserProfile.objects.get(user=request.user)
+    lecture = LectrueModel.objects.get(pk=lecture_id)
+    rows = list(LoginDetails.objects.filter(teacher=teacher, lecture_id=lecture_id).values_list('enrollment_number', 'user',
+                'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
+
+    for row in rows:
+        row = list(row)
+        user = get_object_or_404(User, id=row[2])
+        row[2] = str(get_object_or_404(User, id=row[2]).username) + \
+            ' ' + str(get_object_or_404(User, id=row[2]).unique_id)  # user
+        row[4] = str(UserProfile.objects.get(id=row[4]).user.username)
+        row[5] = str(LectrueModel.objects.get(id=row[5]).lecture_name) + \
+            'by' + \
+            str(LectrueModel.objects.get(id=row[4]).teacher.user.username)
+
+        row_num += 1
+        ws.row(row_num).height_mismatch = True
+
+        for col_num in range(len(row)):
+            if col_num == 6:
+                # date
+                style = xlwt.XFStyle()
+                style.num_format_str = format1
+                ws.write(row_num, col_num, row[col_num], style)
+
+            elif col_num == 7:
+                # time
+                style = xlwt.XFStyle()
+                style.num_format_str = format2
+                ws.write(row_num, col_num, row[col_num], style)
+
+            elif col_num == 8:
+                # image
+                path = LoginDetails.objects.filter(teacher=teacher)[
+                    row_num-1].processed_img
+                print(path)
+
+                s3 = boto3.client('s3',
+                                  aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                                  aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                                  config=Config(signature_version='s3v4'),
+                                  region_name='ap-south-1'
+                                  )
+                url = s3.generate_presigned_url('get_object', Params={
+                                                'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': f"media/{path}"})
+                resp = urllib.request.urlopen(url)
+                img = Image.open(resp)
+                image_parts = img.split()
+                r = image_parts[0]
+                g = image_parts[1]
+                b = image_parts[2]
+
+                img = Image.merge("RGB", (r, g, b))
+                fo = BytesIO()
+                img.save(fo, format='bmp')
+                ws.insert_bitmap_data(fo.getvalue(), row_num, col_num)
+                img.close()
+
+            else:
+                ws.write(row_num, col_num, row[col_num], body_style)
+            ws.write(row_num, 0, lecture.lecture_name, body_style)
     wb.save(response)
     return response
 
@@ -190,8 +298,10 @@ def enable_disable_session_view(request):
                 new_session_obj = SessionAttendanceModel.objects.create(
                     teacher=all_in_one_user.user_profile, lecture=lecture_obj)
                 print("here it goes to celery")
-                after_setting_allow_attendance_to_true.s(teacher_username=all_in_one_user.username, lecture_id=lecture_id).apply_async(
-                    countdown=lecture_obj.time_to_expire_session*60)
+                after_setting_allow_attendance_to_true.apply_async(
+                    (all_in_one_user.username, lecture_id), countdown=lecture_obj.time_to_expire_session*60 )
+                # .apply_async(
+                    # countdown=lecture_obj.time_to_expire_session*60)
                 return redirect(reverse(next_))
 
         else:

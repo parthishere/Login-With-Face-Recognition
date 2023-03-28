@@ -48,6 +48,10 @@ REQUESTED STUDENT LIST:
     <button class='btn btn-success'>Update Lecture</button>
 </a>
 
+<a href="{% url "recognizer:export-lec" pk=lecture.pk %}">
+    <button class='btn btn-success'>Download Attendance</button>
+</a>
+
 
 <form id="sessionForm" method='POST' action="{% url 'recognizer:change-website' %}"  data-url="{% url 'recognizer:change-website' %}">   
     {% csrf_token %}
@@ -61,9 +65,9 @@ REQUESTED STUDENT LIST:
 
 {% for session in lecture.change_website_objects_lecture.all %}
 {% if forloop.first %}
-<h1>Sessions of the lecture </h1>
+<h1>Sessions of the Lecture</h1>
 {% else %}{% endif %}
-<a href="{% url 'teacher:session-detail' pk=session.pk %}"><b>{{ session }}</b></a>
+<a href="{% url 'teacher:session-detail' pk=session.pk %}"><b>{{ session.name }} at {{ session.timestamp }}</b></a>
 <br>
 {% endfor %}
 {% else %}

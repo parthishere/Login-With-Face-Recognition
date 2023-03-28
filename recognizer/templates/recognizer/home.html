@@ -65,7 +65,7 @@
       {% csrf_token %}
       <input type='hidden' name='lecture' value='{{ lec.pk }}'>
       <input id="changeSession" class='mybutton vhmax {% if lec.allow_recognize %}danger{% else %}success{% endif %}' type='submit' value='{% if lec.allow_recognize %}Disable{% else %}Enable{% endif %} Taking Attendance of {{lec.lecture_name}}, code: {{ lec.code }}' name='submit'>
-    </form>
+    </form> <span> lec.time</span>
 
     {% endfor %}
     

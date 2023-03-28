@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-@shared_task
+@shared_task(default_retry_delay=5 * 60, max_retries=2)
 def after_setting_allow_attendance_to_true(teacher_username, lecture_id):
     teacher = UserProfile.objects.select_related("user").prefetch_related(
         "lectures", "change_website_objects").get(user__username=teacher_username)

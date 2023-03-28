@@ -50,6 +50,10 @@ Requested Student List:
     <button class='btn btn-success'>Update Session</button>
 </a>
 
+<a href="{% url "recognizer:export-ses" pk=session.pk %}">
+    <button class='btn btn-success'>Download Attendance</button>
+</a>
+
 
 <form id="sessionForm" method='POST' action="{% url 'recognizer:change-website' %}"  data-url="{% url 'recognizer:change-website' %}">   
     {% csrf_token %}

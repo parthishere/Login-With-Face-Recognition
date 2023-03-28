@@ -50,6 +50,8 @@ def create_student(username, email, gender, teacher, enrollment_number):
         user_profile = UserProfile.objects.get(user=user)
         user_profile.enrollment_number = enrollment_number
         user_profile.gender = gender
+        user_profile.district = teacher.district
+        user_profile.city = teacher.city
         user_profile.college = teacher.college
         user_profile.branch = teacher.branch
         user_profile.save()
