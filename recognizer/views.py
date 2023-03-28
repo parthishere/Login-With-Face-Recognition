@@ -341,7 +341,7 @@ def home_view(request):
 
                 url = reverse('recognizer:home')
                 context['lecture_details_form'] = lecture_details_form
-                if instance in lecture_object.accepted_user.all():
+                if user_profile in lecture_object.accepted_user.all():
                     if teacher_user.accept_with_request:
                         last_session.requested_users.add(instance)
                     else:
