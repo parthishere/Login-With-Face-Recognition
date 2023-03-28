@@ -37,6 +37,7 @@ DEBUG = os.environ['DEBUG']
 
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://faceit.up.railway.app', 'https://*.faceit.up.railway.app','https://*.127.0.0.1']
 
 
 # Application definition
