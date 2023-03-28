@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: dockerfile
     # command: daphne login_with_face.asgi:application -b 0.0.0.0 -p 8000
-    command: bash -c 'python manage.py collectstatic --no-input && python manage.py makemigrations && python manage.py migrate && python3 manage.py initadmin && gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000'
+    command: bash -c 'python manage.py collectstatic --no-input && python manage.py makemigrations && python manage.py migrate && python3 manage.py initadmin && gunicorn login_with_face.wsgi:application -b 0.0.0.0:$PORT'
     environment:
       - DEBUG=0      
     env_file: .env
