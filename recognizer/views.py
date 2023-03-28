@@ -189,7 +189,7 @@ def export_users_xls_lecture(request, lecture_id):
     font_style = xlwt.XFStyle()
     teacher = UserProfile.objects.get(user=request.user)
     lecture = LectrueModel.objects.get(pk=lecture_id)
-    rows = list(LoginDetails.objects.filter(teacher=teacher, lecture_id=lecture_id).values_list('enrollment_number', 'user',
+    rows = list(LoginDetails.objects.filter(teacher=teacher, lecture=lecture).values_list('enrollment_number', 'user',
                 'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
 
     for row in rows:
