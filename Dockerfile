@@ -10,13 +10,11 @@ COPY requirements.txt requirements.txt
 
 # Install the dependencies
 RUN pip install cmake pandas opencv-python-headless && \
-    pip install --no-cache-dir -r requirements.txt && \
-    apt-get install libpq-dev libssl-dev openssl
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the source code to the container
 COPY . .
-USER root
 ENV PATH="py/bin:$PATH"
 EXPOSE 8000
 STOPSIGNAL SIGINT
-CMD ["python","-u", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh","-c", "python manage.py makemigrations && python manage.py migrate && gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000"]

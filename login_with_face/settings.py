@@ -58,11 +58,10 @@ INSTALLED_APPS = [
     "graphene_django",
 
     "customuser",
+    "chat",
     'recognizer',
     'login_details',
     'teacher',
-    "chat",
-
 
     'django_filters',
     'rest_framework',
@@ -112,7 +111,8 @@ TEMPLATES = [
 ]
 
 
-ASGI_APPLICATION = "login_with_face.asgi.application"
+# ASGI_APPLICATION = "login_with_face.asgi.application"
+WSGI_APPLICATION = "login_with_face.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -128,6 +128,16 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL')],
+            # "hosts": [("redis", 6379)],
+        },
+    },
+}
+
 # DATABASES = {
 
 #     'default': {
@@ -136,15 +146,6 @@ DATABASES = {
 #     }
 # }
 
-
-# 'default': {
-#     #     'ENGINE': 'django.db.backends.postgresql',
-#     #     'NAME': os.environ['DATABASE_NAME'],
-#     #     'HOST': os.environ['DATABASE_HOST'],
-#     #     'PORT': 5432,
-#     #     'USER': os.environ['DATABASE_USER'],
-#     #     'PASSWORD': os.environ['DATABASE_PASSWORD'],
-#     # }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -218,7 +219,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # celery broker and result
 CELERY_BROKER_URL = os.environ["REDIS_URL"]
 CELERY_RESULT_BACKEND = os.environ["REDIS_URL"]
-
 # CELERY_BROKER_URL = 'redis://localhost:6379/0'
 # CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
@@ -228,7 +228,6 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 
 CELERY_RESULT_BACKEND = 'django-db'
-
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -272,77 +271,58 @@ AUTHENTICATION_BACKENDS = (
 os.environ['DJANGO_SETTINGS_MODULE'] = 'login_with_face.settings'
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("redis", 6379)],
-#         },
-#     },
-# }
-
 LOGGING = {
-'version': 1,
-'disable_existing_loggers': False,
-'filters': {
-    'require_debug_false': {
-        '()': 'django.utils.log.RequireDebugFalse',
-    },
-    'require_debug_true': {
-        '()': 'django.utils.log.RequireDebugTrue',
-    },
-},
-'formatters': {
-    'django.server': {
-        '()': 'django.utils.log.ServerFormatter',
-        'format': '[%(server_time)s] %(message)s',
-    }
-},
-'handlers': {
-    'console': {
-        'level': 'INFO',
-        'filters': ['require_debug_true'],
-        'class': 'logging.StreamHandler',
-    },
-    # Custom handler which we will use with logger 'django'.
-    # We want errors/warnings to be logged when DEBUG=False
-    'console_on_not_debug': {
-        'level': 'WARNING',
-        'filters': ['require_debug_false'],
-        'class': 'logging.StreamHandler',
-    },
-    'django.server': {
-        'level': 'INFO',
-        'class': 'logging.StreamHandler',
-        'formatter': 'django.server',
-    },
-    'mail_admins': {
-        'level': 'ERROR',
-        'filters': ['require_debug_false'],
-        'class': 'django.utils.log.AdminEmailHandler'
-    }
-},
-'loggers': {
-    'django': {
-        'handlers': ['console', 'mail_admins', 'console_on_not_debug'],
-        'level': 'INFO',
-    },
-    'django.server': {
-        'handlers': ['django.server'],
-        'level': 'INFO',
-        'propagate': False,
-    },
-}
-}
-
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL')],
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
         },
     },
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        },
+        # Custom handler which we will use with logger 'django'.
+        # We want errors/warnings to be logged when DEBUG=False
+        'console_on_not_debug': {
+            'level': 'WARNING',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler',
+        },
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'mail_admins', 'console_on_not_debug'],
+            'level': 'INFO',
+        },
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    }
 }
 
 

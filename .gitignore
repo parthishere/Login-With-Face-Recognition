@@ -1,20 +1,14 @@
-db.sqlite3
+# db.sqlite3
 media
 data/
-.dockerignore
 .env.dev
-# docker-compose.yml
-# dockerfile
 face_recog
-package.json
-package-lock.json
 websocket.py
 docker/
 certbot/
 /data
 key.pem
 cert.pem
-nginx
 ssh
 ssh/
 certbot.sh

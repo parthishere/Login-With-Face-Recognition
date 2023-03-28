@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: dockerfile
     # command: daphne login_with_face.asgi:application -b 0.0.0.0 -p 8000
-    command: bash -c 'python manage.py collectstatic --no-input && python manage.py makemigrations && python manage.py migrate && python3 manage.py initadmin && python3 -u manage.py runserver 0.0.0.0:8000'
+    command: bash -c 'python manage.py collectstatic --no-input && python manage.py makemigrations && python manage.py migrate && python3 manage.py initadmin && gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000'
     environment:
       - DEBUG=0      
     env_file: .env
@@ -47,25 +47,6 @@ services:
       - db
     ports: []
     command: celery -A login_with_face worker -l INFO -E
-
-  # nginx:
-  #   image: nginx
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf
-  #     - ./certbot:/etc/letsencrypt
-  #     - ./static_media:/django/static
-  #   ports:
-  #     - "8080:80"
-  #     - "8443:443"
-  #   depends_on:
-  #     - web
-
-  # certbot:
-  #   image: certbot/certbot
-  #   volumes:
-  #     - ./certbot:/etc/letsencrypt
-  #     - ./static_media:/fjango/static
-  #   command: certonly --webroot --webroot-path=/django/staticfiles -v --register-unsafely-without-email --agree-tos --no-eff-email --staging -d localhost
 
 
 

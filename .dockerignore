@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.docker
+
+certbot/
+/data
+key.pem
+cert.pem
+nginx
+ssh/
+ssh
+certbot.sh
+nginx.conf
+
+# Python
+app/__pycache__/
+app/*/__pycache__/
+app/*/*/__pycache__/
+app/*/*/*/__pycache__/
+.env/
+.venv/
+venv/
+
+# Local PostgreSQL data
+data/
+
+node_modules
