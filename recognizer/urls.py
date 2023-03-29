@@ -49,8 +49,9 @@ urlpatterns = [
     path('profile/image/<int:pk>/update', update_profile_image_view, name='update-img-profile'),
     path('login-with-face', login_with_face, name='login-with-face'),
     path('change-session', enable_disable_session_view, name='change-website'),
-    path('export-attendance-lec/<int:lecture_id>', export_users_xls_lecture, name='export-lec'),
-    path('export-attendance-ses/<int:session_id>', export_users_xls_session, name='export-ses'),
+    
+    path('export-attendance-lec/<int:pk>/download', export_users_xls_lecture, name='export-lec'),
+    path('export-attendance-ses/<int:pk>/download', export_users_xls_session, name='export-ses'),
     path("succsess/", succsess, name="sus"),
     path('profile/<int:pk>/attended-lectures', lecture_details, name="stud-lectures"),
     # path('facecam-feed', facecam_feed, name='feed_stream'),

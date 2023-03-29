@@ -29,6 +29,7 @@ from .views import (
     update_session,
     lecture_accepted_students_from_other_lecture,
     see_all_requests_of_session,
+    see_all_sessions_list,
 
 
 
@@ -72,6 +73,7 @@ urlpatterns = [
          lecture_accepted_students_from_other_lecture, name="copy-lec"),
 
     path("sessions-status/", see_all_sessions, name="sessions"),
+    path("sessions-list/", see_all_sessions_list, name="sessions"),
     path("session/<int:pk>", session_detail, name='session-detail'),
     path("session/<int:pk>/delete", delete_session, name='session-delete'),
     path("session/<int:pk>/update", update_session, name='session-update'),

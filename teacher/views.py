@@ -379,6 +379,13 @@ def see_all_sessions(request):
 
     return render(request, "teacher/sessions.html", context)
 
+def see_all_sessions_list(request):
+    context = {}
+    sessions = SessionAttendanceModel.objects.filter(teacher=request.user.user_profile)
+    context['sessions'] = sessions
+
+    return render(request, "teacher/search-list.html", context)
+
 
 def lecture_accepted_students_from_other_lecture(request, from_pk, to_pk):
     """

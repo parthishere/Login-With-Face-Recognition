@@ -44,13 +44,15 @@ def check(request):
     return render(request, "base.html", {"user": user})
 
 
-@user_passes_test(lambda u: u.is_teacher)
-def export_users_xls_session(request, session_id):
+
+def export_users_xls_session(request, pk):
+    teacher = UserProfile.objects.get(user=request.user)
+    session = SessionAttendanceModel.objects.get(pk=pk)
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
+    response['Content-Disposition'] = f'attachment; filename="{session.name}_{session.timestamp}.xls"'
 
     wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Users')
+    ws = wb.add_sheet('Users', cell_overwrite_ok=True)
 
     # Sheet header, first row
     row_num = 0
@@ -72,7 +74,7 @@ def export_users_xls_session(request, session_id):
     format1 = 'D-MMM-YY'
     format2 = 'h:mm:ss AM/PM'
 
-    columns = ['Session Name', 'Enrollment number', 'User', 'Authenticated user', 'Teacher',
+    columns = ["Session", 'Enrollment number', 'User', 'Authenticated user', 'Teacher',
                'Lecture', 'Login date', 'Login time', "Authenticated Images"]
 
     for col_num in range(len(columns)):
@@ -80,25 +82,18 @@ def export_users_xls_session(request, session_id):
 
     # Sheet body, remaining rows
     font_style = xlwt.XFStyle()
-    teacher = UserProfile.objects.get(user=request.user)
-    rows = list(SessionAttendanceModel.objects.get(teacher=teacher, pk=session_id).values_list('name', 'atendees__enrollment_number','user', 'atendees__authenticated_user', 'atendees__teacher', 'atendees__lecture', 'atendees__login_date', 'atendees__login_time', 'atendees__processed_img'))
+    
+    rows = list(SessionAttendanceModel.objects.filter(pk=pk).values_list('name', 'atendees__enrollment_number','atendees__user', 'atendees__authenticated_user', 'atendees__teacher__user__username', 'atendees__lecture', 'atendees__login_date', 'atendees__login_time', 'atendees__processed_img'))
 
     for row in rows:
-        # columns = ['Enrollment number', 'User', 'Authenticated user', 'Teacher',
-        #        'Lecture', 'Login date', 'Login time', "Authenticated Images"]
-        
-        # rows = list(LoginDetails.objects.filter(teacher=teacher).values_list('enrollment_number', 'user',
-        #         'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
 
 
         row = list(row)
         user = get_object_or_404(User, id=row[2])
-        row[1] = str(get_object_or_404(User, id=row[2]).username) + \
-            ' ' + str(get_object_or_404(User, id=row[2]).unique_id)  # user
-        row[4] = str(UserProfile.objects.get(id=row[4]).user.username)
+        row[1] = str(get_object_or_404(User, id=row[2]).username)
         row[5] = str(LectrueModel.objects.get(id=row[5]).lecture_name) + \
             'by' + \
-            str(LectrueModel.objects.get(id=row[4]).teacher.user.username)
+            str(row[4])
 
         row_num += 1
         ws.row(row_num).height_mismatch = True
@@ -108,14 +103,21 @@ def export_users_xls_session(request, session_id):
                 # date
                 style = xlwt.XFStyle()
                 style.num_format_str = format1
-                ws.write(row_num, col_num, row[col_num], style)
+                try:
+                    ws.write(row_num, col_num, row[col_num], style)
+                except:
+                    ws._cell_overwrite_ok = True
+                    pass
 
             elif col_num == 7:
                 # time
                 style = xlwt.XFStyle()
                 style.num_format_str = format2
-                ws.write(row_num, col_num, row[col_num], style)
-
+                try:
+                    ws.write(row_num, col_num, row[col_num], style)
+                except:
+                    ws._cell_overwrite_ok = True
+                    pass
             elif col_num == 8:
                 # image
                 path = LoginDetails.objects.filter(teacher=teacher)[
@@ -144,20 +146,27 @@ def export_users_xls_session(request, session_id):
                 img.close()
 
             else:
-                ws.write(row_num, col_num, row[col_num], body_style)
+                try:
+                    ws.write(row_num, col_num, row[col_num], body_style)
+                except:
+                    ws._cell_overwrite_ok = True
+                    pass
 
     wb.save(response)
     return response
 
 
 
-@user_passes_test(lambda u: u.is_staff)
-def export_users_xls_lecture(request, lecture_id):
+def export_users_xls_lecture(request, pk):
+    teacher = request.user.user_profile
+    lecture = LectrueModel.objects.get(pk=pk)
+    
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="attendance.xls"'
+    response['Content-Disposition'] = f'attachment; filename="{lecture}.xls"'
 
     wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Users')
+    
+    ws = wb.add_sheet('Users', cell_overwrite_ok=True)
 
     # Sheet header, first row
     row_num = 0
@@ -179,7 +188,7 @@ def export_users_xls_lecture(request, lecture_id):
     format1 = 'D-MMM-YY'
     format2 = 'h:mm:ss AM/PM'
 
-    columns = ["Lecture Name", 'Enrollment number', 'User', 'Authenticated user', 'Teacher',
+    columns = ['Enrollment number', 'User', 'Authenticated user', 'Teacher',
                'Lecture', 'Login date', 'Login time', "Authenticated Images"]
 
     for col_num in range(len(columns)):
@@ -187,38 +196,45 @@ def export_users_xls_lecture(request, lecture_id):
 
     # Sheet body, remaining rows
     font_style = xlwt.XFStyle()
-    teacher = UserProfile.objects.get(user=request.user)
-    lecture = LectrueModel.objects.get(pk=lecture_id)
+    
+    
     rows = list(LoginDetails.objects.filter(teacher=teacher, lecture=lecture).values_list('enrollment_number', 'user',
                 'authenticated_user', 'teacher', 'lecture', 'login_date', 'login_time', 'processed_img'))
-
+    
     for row in rows:
         row = list(row)
-        user = get_object_or_404(User, id=row[2])
-        row[2] = str(get_object_or_404(User, id=row[2]).username) + \
-            ' ' + str(get_object_or_404(User, id=row[2]).unique_id)  # user
-        row[4] = str(UserProfile.objects.get(id=row[4]).user.username)
-        row[5] = str(LectrueModel.objects.get(id=row[5]).lecture_name) + \
-            'by' + \
-            str(LectrueModel.objects.get(id=row[4]).teacher.user.username)
+        print(row[2])
+        user = get_object_or_404(User, id=row[1])
+        row[1] = str(get_object_or_404(User, id=row[1]).username) 
+        row[3] = str(UserProfile.objects.get(id=row[3]).user.username)
+        row[4] = str(LectrueModel.objects.get(id=row[4]).lecture_name) +'by' + str(LectrueModel.objects.get(id=row[4]).teacher.user.username)
 
         row_num += 1
         ws.row(row_num).height_mismatch = True
 
         for col_num in range(len(row)):
-            if col_num == 6:
+            
+            if col_num == 5:
                 # date
                 style = xlwt.XFStyle()
                 style.num_format_str = format1
-                ws.write(row_num, col_num, row[col_num], style)
+                try:
+                    ws.write(row_num, col_num, row[col_num], style)
+                except:
+                    ws._cell_overwrite_ok = True
+                    pass
 
-            elif col_num == 7:
+            elif col_num == 6:
                 # time
                 style = xlwt.XFStyle()
                 style.num_format_str = format2
-                ws.write(row_num, col_num, row[col_num], style)
+                try:
+                    ws.write(row_num, col_num, row[col_num], style)
+                except:
+                    ws._cell_overwrite_ok = True
+                    pass
 
-            elif col_num == 8:
+            elif col_num == 7:
                 # image
                 path = LoginDetails.objects.filter(teacher=teacher)[
                     row_num-1].processed_img
@@ -246,8 +262,13 @@ def export_users_xls_lecture(request, lecture_id):
                 img.close()
 
             else:
-                ws.write(row_num, col_num, row[col_num], body_style)
-            ws.write(row_num, 0, lecture.lecture_name, body_style)
+                try:
+                    ws.write(row_num, col_num, row[col_num], style)
+                except:
+                    ws._cell_overwrite_ok = True
+                    pass
+            
+      
     wb.save(response)
     return response
 

@@ -84,6 +84,30 @@
         <hr>
 
 {% endfor %}
+
+{% for ses in sessions %}
+<b><h4> Teacher List</b></h4>
+<center>
+<div class="col-md-8">
+    
+    <div class="card mb-3">
+        
+      <div class="card-body">
+        <div class="row">
+            
+          <div class="col-sm-3">
+            <h6 class="mb-0">{{ ses.name }} {{ is_teacher }}</h6>
+          </div>
+          <div class="col-sm-9 text-secondary">
+            <a href={{ ses.get_absolute_url }}>{{ ses }} </a>
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+        <hr>
+
+{% endfor %}
         
 
 
