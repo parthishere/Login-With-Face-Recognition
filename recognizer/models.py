@@ -252,6 +252,8 @@ def user_post_save_receiver(sender, instance, *args, **kwargs):
     try:
         if obj is None:
             obj = UserProfile.objects.create(user=instance)
+        else: 
+            return
     except Exception as e:
         print(e)
         
@@ -260,9 +262,6 @@ def user_post_save_receiver(sender, instance, *args, **kwargs):
         if obj.unique_id is None:
             obj.unique_id = unique_id_generator(obj)
             obj.save()
-        if obj.enrollment_number:
-            if obj.enrollment_number:
-                instance.enrollment_number = obj.enrollment_number
     except:
         pass
 

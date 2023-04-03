@@ -595,9 +595,10 @@ def login_view(request):
                 user_profile = UserProfile.objects.select_related(
                     "user").get(user=user)
 
-                
-                return redirect('recognizer:home')
-                
+                if user_profile.user.is_updated:
+                    return redirect('recognizer:home')
+                else:
+                    return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
                 messages.error(request, 'User not found signup first!')
                 return render(request, 'recognizer/login.html', context=context)
@@ -741,11 +742,10 @@ def update_profile_view(request, pk=None):
         if request.POST:
             if edit_form.is_valid():
                 user_profile = edit_form.save()
-                try:
-                    user.is_updated = True
-                    user.save()
-                except:
-                    pass
+                
+                user.is_updated = True
+                user.is_updated = True
+                user.save()
                 messages.success(request, "Profile Edited Sucsessfuly")
                 request.session['uqid'] = user_profile.unique_id
                 context = {
