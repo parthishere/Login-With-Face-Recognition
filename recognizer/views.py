@@ -742,8 +742,11 @@ def update_profile_view(request, pk=None):
         if request.POST:
             if edit_form.is_valid():
                 user_profile = edit_form.save()
-                user.is_updated = True
-                user.save()
+                try:
+                    user.is_updated = True
+                    user.save()
+                except:
+                    pass
                 messages.success(request, "Profile Edited Sucsessfuly")
                 request.session['uqid'] = user_profile.unique_id
                 context = {
