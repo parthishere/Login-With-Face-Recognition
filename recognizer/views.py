@@ -595,10 +595,9 @@ def login_view(request):
                 user_profile = UserProfile.objects.select_related(
                     "user").get(user=user)
 
-                if user_profile.user.is_updated:
-                    return redirect('recognizer:home')
-                else:
-                    return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
+                
+                return redirect('recognizer:home')
+                
             else:
                 messages.error(request, 'User not found signup first!')
                 return render(request, 'recognizer/login.html', context=context)
