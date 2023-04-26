@@ -17,4 +17,4 @@ COPY . .
 ENV PATH="py/bin:$PATH"
 EXPOSE 8000
 STOPSIGNAL SIGINT
-CMD ["sh","-c", "python manage.py makemigrations && python manage.py migrate && gunicorn login_with_face.wsgi:application -b 0.0.0.0:$PORT"]
+CMD ["sh","-c", "python manage.py makemigrations && python manage.py migrate && gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000"]
