@@ -19,6 +19,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.views.static import serve
 from django.conf import settings
+from rest_framework.schemas import get_schema_view
+from rest_framework.documentation import include_docs_urls
 import debug_toolbar
 
 
@@ -35,6 +37,15 @@ urlpatterns = [
     path('teacher/', include('teacher.urls', namespace='teacher')),
     path("chat/", include("chat.urls", namespace="chat")),
     
+    path('schema/', get_schema_view(
+        title="API",
+        description="API for the Trading App",
+        version="1.0.0"
+    ), name="social-schema"),
+    path('api/', include_docs_urls(
+        title="API",
+        description="API for the Trading App",
+    ), name="social-docs"),
     path('api/auth/', include('dj_rest_auth.urls')),
     
     path("api/login-details/", include("login_details.api.urls")),
