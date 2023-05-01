@@ -46,6 +46,7 @@ urlpatterns = [
         title="API",
         description="API for the Trading App",
     ), name="social-docs"),
+    
     path('api/auth/', include('dj_rest_auth.urls')),
     
     path("api/login-details/", include("login_details.api.urls")),

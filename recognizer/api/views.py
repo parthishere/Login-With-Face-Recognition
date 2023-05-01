@@ -291,7 +291,7 @@ class SessionListAPI(ListAPIView):
     permission_classes = [IsTeacherOnly]
     serializer_class = SessionAttendanceModelSerailizer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["atendees__in", 'teacher', 'lecture', 'timestamp', "requested_users"]
+    filterset_fields = ['teacher', 'lecture', 'timestamp', "requested_users"]
     search_fields = ["atendees", 'teacher', 'lecture', 'timestamp', "name"]
     
     def list(self, request, *args, **kwargs):
@@ -306,7 +306,7 @@ class SessionDetailUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsTeacherOnly]
     serializer_class = SessionAttendanceModelSerailizer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ["atendees__in", 'teacher', 'lecture', 'timestamp', "requested_users"]
+    filterset_fields = ['teacher', 'lecture', 'timestamp', "requested_users"]
     search_fields = ["atendees", 'teacher', 'lecture', 'timestamp', "name"]
     
     def get_object(self): 
