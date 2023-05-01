@@ -64,14 +64,18 @@ class UserProfileDetailUpdateDelete(RetrieveUpdateDestroyAPIView):
         Profile Detail Update Delete View
     """
     queryset = UserProfile.objects.select_related("user", "branch", "college").all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get_serializer_class(self, *args, **kwargs):
-        user = self.request.user
-        if user.is_teacher or not user.is_updated:
+        try:
+            user = self.request.user
+            
+            if user.is_teacher or not user.is_updated:
+                return OverAllUserProfileUpdateSerializer
+            else:
+                return SecondTimeUserProfileUpdateSerializer
+        except:
             return OverAllUserProfileUpdateSerializer
-        else:
-            return SecondTimeUserProfileUpdateSerializer
     
     def perform_destroy(self, instance):
         if self.request.user == instance.user:
@@ -340,7 +344,7 @@ class CitesListView(ListAPIView):
     serializer_class = CityCollegeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['city_name', 'district']
+    # filterset_fields = ['city_name', 'district']
     search_fields = ['city_name', 'district']
     
 class CollegesListView(ListAPIView):
@@ -348,7 +352,7 @@ class CollegesListView(ListAPIView):
     serializer_class = CityCollegeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['college_name', 'city']
+    # filterset_fields = ['college_name', 'city']
     search_fields = ['college_name', 'city']
     
 class BranchListView(ListAPIView):
@@ -356,7 +360,7 @@ class BranchListView(ListAPIView):
     serializer_class = CityCollegeSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['branch_name', 'college']
+    # filterset_fields = ['branch_name', 'college']
     search_fields = ['branch_name', 'college']
     
 def overall_attandence_in_lecture(request, pk):

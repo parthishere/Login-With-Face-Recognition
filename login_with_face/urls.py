@@ -39,12 +39,12 @@ urlpatterns = [
     
     path('schema/', get_schema_view(
         title="API",
-        description="API for the Trading App",
+        description="API for the Attendace App",
         version="1.0.0"
     ), name="social-schema"),
     path('api/', include_docs_urls(
         title="API",
-        description="API for the Trading App",
+        description="API for the Attendace App",
     ), name="social-docs"),
     
     path('api/auth/', include('dj_rest_auth.urls')),

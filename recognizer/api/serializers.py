@@ -30,7 +30,7 @@ class OverAllUserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = "__all__"
-        read_only_fields = ('user', "unique_id", "is_updated", "ip_address1", "ip_address2", "login_proceed")
+        read_only_fields = ('user', "unique_id", "is_updated", "ip_address1", "ip_address2", "login_proceed",)
     
     @staticmethod
     def setup_eager_loading(queryset):
@@ -42,7 +42,7 @@ class SecondTimeUserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = "__all__"
-        read_only_fields = ('user', "unique_id", "is_updated", "ip_address1", "ip_address2", "login_proceed", "city", "district", "image", "gender", "branch", "college")
+        read_only_fields = ["user", "unique_id", "is_updated", "ip_address1", "ip_address2", "login_proceed", "city", "district", "image", "gender", "branch", "college",]
     
     @staticmethod
     def setup_eager_loading(queryset):
@@ -85,7 +85,7 @@ class LectrueModelSerializer(serializers.ModelSerializer):
     class Meta():
         model = LectrueModel
         fields = "__all__"
-        read_only_fields = ('teacher')
+        read_only_fields = ('teacher',)
 
     
 class SessionAttendanceModelSerailizer(serializers.ModelSerializer):
@@ -100,10 +100,10 @@ class CityCollegeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CityCollegeModel
         field = "__all__"
-        read_only_fields = "__all__"
+        read_only_fields = ("__all__")
         
 class CityCollegeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CityCollegeModel
         field = "__all__"
-        read_only_fields = "__all__"
+        read_only_fields = ("__all__")
