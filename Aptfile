@@ -1,0 +1,3 @@
+sudo apt install libavdevice-dev libavfilter-dev libavformat-dev
+sudo apt install libavcodec-dev libswresample-dev libswscale-dev 
+sudo apt install libavutil-dev
