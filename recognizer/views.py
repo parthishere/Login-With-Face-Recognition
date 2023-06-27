@@ -333,20 +333,31 @@ def enable_disable_session_view(request):
 # Create your views here
 
 # @allow_by_ip
-@login_required(login_url='recognizer:login')
-def home_view(request):
+
+import ipaddress
+import time
+import asyncio
+
+from asgiref.sync import async_to_sync, sync_to_async
+
+# @sync_to_async
+# @login_required(login_url='recognizer:login')
+# @async_to_sync
+async def home_view(request):
     print("in home")
     try:
         user_ip = request.META['HTTP_X_FORWARDED_FOR']
     except:
         user_ip = request.META['REMOTE_ADDR']
     second_user_ip = request.META['REMOTE_ADDR']
-    context = {}
+    
 
-    context['allow_attendance'] = False
-    context['is_teacher'] = False
-    context['user_ip'] = user_ip
-    context['second_user_ip'] = second_user_ip
+    context = {
+    'allow_attendance': False,
+    'is_teacher': False,
+    'user_ip': user_ip,
+    'second_user_ip': second_user_ip,
+    }
 
     all_in_one_user = request.user
 
@@ -355,15 +366,10 @@ def home_view(request):
     # print(user_user_profile_ip_lectures.user_profile.lectures.all())
     # print(user_user_profile_ip_lectures.user_profile.ip_address.all())
 
-    try:
-        if all_in_one_user.is_teacher:
-            lectures = all_in_one_user.user_profile.lectures.all()
-            print(lectures)
-            context['lectures_list'] = lectures
-            context['is_teacher'] = True
-    except Exception as e:
-        print(e)
-        pass
+    if all_in_one_user.is_teacher:
+        lectures = all_in_one_user.user_profile.lectures.all()
+        context['lectures_list'] = lectures
+        context['is_teacher'] = True
 
     lecture_details_form = LectureDetailsForm(
         request.POST, request.FILES, user_profile=all_in_one_user.user_profile)
@@ -386,47 +392,38 @@ def home_view(request):
         teacher = request.POST.get('teacher')
         lecture = request.POST.get('lecture')
         ip1, ip2 = None, None
-        try:
-            ip1 = request.POST['ip1']
-            if ip1 == '':
-                ip1 = None
-        except:
-            pass
+        ip1 = request.POST.get('ip1') or None
 
-        teacher_from_form = UserProfile.objects.select_related(
-            "user").prefetch_related("change_website_objects").get(id=teacher)
+        teacher_user = UserProfile.objects.select_related("user").prefetch_related("change_website_objects").get(id=teacher)
 
-        if teacher_from_form.user.is_teacher:
-            teacher_user = teacher_from_form
-        else:
+        if not teacher_user.user.is_teacher:
             return HttpResponse("nathi bhai koi aa naam nu teacher")
 
         if user_profile.user.pk == teacher_user.user.pk:
             teacher_user.ip_address1 = ip1
-            teacher_user.save()
+
+        teacher_user.ip_address2 = user_ip
+        teacher_user.save()
 
         allowed_ips = []
+        allow_attendance = False
 
         if teacher_user.ip_address1:
-            allowed_ip_host = ".".join(
-                teacher_user.ip_address1.split('.')[0:3])
-            allowed_masks = (".{}".format(i) for i in range(256))
-            for mask in allowed_masks:
-                allowed_ips.append(str(allowed_ip_host)+str(mask))
+            allowed_subnet = ipaddress.IPv4Network(teacher_user.ip_address1, strict=False)
+            allowed_ips.extend(str(ip) for ip in allowed_subnet.hosts())
 
         if teacher_user.ip_address2:
-            allowed_ip_host = ".".join(
-                teacher_user.ip_address2.split('.')[0:3])
-            allowed_masks = (".{}".format(i) for i in range(256))
-            for mask in allowed_masks:
-                allowed_ips.append(str(allowed_ip_host)+str(mask))
+            allowed_subnet = ipaddress.IPv4Network(teacher_user.ip_address2, strict=False)
+            allowed_ips.extend(str(ip) for ip in allowed_subnet.hosts())
+
+            lecture_object = get_object_or_404(LectrueModel, id=lecture)
 
         lecture_object = get_object_or_404(LectrueModel, id=lecture)
 
         try:
             allow_attendance = lecture_object.allow_recognize
 
-            last_session = teacher_from_form.change_website_objects.first()
+            last_session = teacher_user.change_website_objects.first()
             print(last_session.name)
             context['allow_attendance'] = allow_attendance
         except:
@@ -459,9 +456,17 @@ def home_view(request):
                 print(e)
                 details = None
 
-            frame, login_proceed = get_face_detect_data(ifile, details)
+            start_time = time.time()
+            frame, login_proceed = await get_face_detect_data(ifile, details)
+            print(login_proceed)
             _, buf = cv2.imencode('.jpg', frame)
             image = ContentFile(buf.tobytes())
+            end_time = time.time()
+            execution_time = end_time - start_time
+            print(f"Execution time: {execution_time} seconds")
+        
+
+            
             if login_proceed:
                 context['face_recognized'] = True
                 user_profile.login_proceed = login_proceed
@@ -473,16 +478,17 @@ def home_view(request):
                 url = reverse('recognizer:home')
                 context['lecture_details_form'] = lecture_details_form
                 if user_profile in lecture_object.accepted_user.all():
-                    if teacher_user.accept_with_request:
-                        last_session.requested_users.add(instance)
-                    else:
-                        last_session.atendees.add(instance)
+                    last_session.atendees.add(instance)
+                    last_session.save()
+                    
+                else:
+                    last_session.requested_users.add(instance)
                     last_session.save()
                     user_profile.save()
-                else:
-                    messages.error(request, f"you are not accepted in lecture")
+                    messages.error(request, f"you are not accepted in lecture but your attendace has taken as {user.username} - {user_profile.enrollment_number}")
                     return JsonResponse(status=302, data={'success': url})
-
+                
+                user_profile.save()
                 messages.success(
                     request, f'Your face was recognized as {user.username} - {user_profile.enrollment_number}')
 
@@ -519,17 +525,21 @@ def succsess(request):
 
 def load_cities(request):
     distric_id = request.GET.get('district')
+    print("heyyyyyy")
     cities = CityCollegeModel.objects.filter(district_id=distric_id).all()
-    return render(request, 'recognizer/load_cites.html', {'cities': cities})
+    return render(request, 'recognizer/load_cities.html', {'cities': cities})
 
 
 def load_colleges(request):
+    print("heyyyyyy2")
     city_id = request.GET.get('city')
     colleges = CollegeModel.objects.filter(city_id=city_id).all()
     return render(request, 'recognizer/load_colleges.html', {'colleges': colleges})
 
 
+
 def load_branches(request):
+    print("heyyyyyy3")
     college_id = request.GET.get('college')
     branches = CollegeBranchModel.objects.filter(college_id=college_id).all()
     return render(request, 'recognizer/load_branches.html', {'branches': branches})
@@ -600,7 +610,7 @@ def login_view(request):
                 else:
                     return redirect(reverse('recognizer:update-profile', kwargs={'pk': user_profile.pk}))
             else:
-                messages.error(request, 'User not found signup first!')
+                messages.error(request, 'Username or password not found , forgot password or make another account to continue!')
                 return render(request, 'recognizer/login.html', context=context)
 
     return render(request, 'recognizer/login.html', context=context)

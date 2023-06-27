@@ -17,6 +17,7 @@ class CustomUser(AbstractUser):
     is_teacher = models.BooleanField(default=False)
     is_updated = models.BooleanField(default=False)
     enrollment_number = models.BigIntegerField(default=100)
+    is_manager = models.BooleanField(default=False)
     objects = CustomUserManager()    
 
 

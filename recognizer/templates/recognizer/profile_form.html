@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 
 {% block body_block %}
 
@@ -11,15 +11,18 @@
 {% endfor %}
 
 </br>
+
+
 <div class='container-sm'>
-<form method='POST' class='form-control' enctype="multipart/form-data">
+<form method='POST' class='form-control' enctype="multipart/form-data" id="profileUpdateForm" city-url="{% url 'recognizer:city-data-url' %}" college-url="{% url 'recognizer:college-data-url' %}" branch-url="{% url 'recognizer:branch-data-url' %}">
+    
     {% csrf_token %}
     {{ form.as_p }}
     <input class='form-control btn btn-primary' type='submit' value='submit'>
     </br>
 </form>
 </div>
-
+<script src="{% static 'recognizer/js/ajax.js' %}"></script>
 
 {% endblock %}
 

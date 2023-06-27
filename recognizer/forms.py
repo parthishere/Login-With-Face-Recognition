@@ -3,6 +3,7 @@ from django import forms
 from login_details.models import LoginDetails
 
 from .models import LectrueModel, UserProfile
+from teacher.models import CollegeBranchModel, CollegeModel, DistrictCollege, CityCollegeModel
 
 class UserCreateForm(forms.Form):
     username = forms.CharField()
@@ -37,17 +38,68 @@ class FirstTimeUserProfileForm(forms.ModelForm):
         model = UserProfile
         fields = ['image', 'enrollment_number', 'about', 'gender', 'birth_date',
                   'phone_number', 'website', 'github_username',
-                  'twitter_handle', 'instagram_username', 'facebook_username', "college", "company", "branch", "city","district", "semester"]
+                  'twitter_handle', 'instagram_username', 'facebook_username',"district", "city", "college", "branch",  "semester", "company", ]
 
         
     def __init__(self, *args, **kwargs):
+        
         super(FirstTimeUserProfileForm, self).__init__(*args, **kwargs)
+        
         self.fields['enrollment_number'].required = True
+        
+        self.fields['district'].widget.attrs.update({'class':'form-control'})
+        self.fields['district'].required = True
+        
+        self.fields['city'].widget.attrs.update({'class':'form-control'})
+        self.fields['city'].queryset = CityCollegeModel.objects.none()
+        self.fields['city'].required = True
+        
         self.fields['college'].required = True
+        self.fields['college'].queryset = CollegeModel.objects.none()
+        self.fields['college'].widget.attrs.update({'class':'form-control', 'required':'true'})
+        
+        self.fields['branch'].widget.attrs.update({'class':'form-control'})
+        self.fields['branch'].queryset = CollegeBranchModel.objects.none()
         self.fields['branch'].required = True
+        
         self.fields['semester'].required = True
+        
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
+            
+        if 'district' in self.data:
+            try:
+                district_id = int(self.data.get('district'))
+                
+                self.fields['city'].queryset =CityCollegeModel.objects.filter(district_id=district_id).order_by('-id')
+            except (ValueError, TypeError):
+                pass  # invalid input from the client; ignore and fallback to empty City queryset
+        elif self.instance.pk:
+            self.fields['city'].queryset = CityCollegeModel.objects.all()
+            
+            
+        if 'city' in self.data:
+            try:
+                city_id = int(self.data.get('city'))
+                
+                self.fields['college'].queryset =CollegeModel.objects.filter(city_id=city_id).order_by('-id')
+            except (ValueError, TypeError):
+                pass  # invalid input from the client; ignore and fallback to empty City queryset
+        elif self.instance.pk:
+            self.fields['college'].queryset = CollegeModel.objects.all()
+            
+        
+        if 'college' in self.data:
+            try:
+                college_id = int(self.data.get('college'))
+                
+                self.fields['branch'].queryset =CollegeBranchModel.objects.filter(college_id=college_id).order_by('-id')
+            except (ValueError, TypeError):
+                pass  # invalid input from the client; ignore and fallback to empty City queryset
+        elif self.instance.pk:
+            self.fields['branch'].queryset = CollegeBranchModel.objects.all()
+
+
             
 class SecondTimeUserProfileForm(forms.ModelForm):
     birth_date = forms.DateField(widget = forms.SelectDateWidget())

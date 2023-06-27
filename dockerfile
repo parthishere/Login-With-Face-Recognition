@@ -1,5 +1,6 @@
 FROM python:3.9
 ENV PYTHONBUFFERED=1
+ENV PYTHONUNBUFFERED=TRUE
 ENV REDIS_HOST "redis"
 
 # Set the working directory
@@ -17,4 +18,4 @@ COPY . .
 ENV PATH="py/bin:$PATH"
 EXPOSE 8000
 STOPSIGNAL SIGINT
-CMD ["sh","-c", "python manage.py makemigrations && python manage.py migrate && gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000"]
+CMD ["sh","-c", "python manage.py makemigrations && python manage.py migrate &&  python manage.py runserver 0.0.0.0:8000"]

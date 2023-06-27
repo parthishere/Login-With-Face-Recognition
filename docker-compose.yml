@@ -27,9 +27,12 @@ services:
       context: .
       dockerfile: dockerfile
     # command: daphne login_with_face.asgi:application -b 0.0.0.0 -p 8000
-    command: bash -c 'python manage.py collectstatic --no-input && python manage.py makemigrations && python manage.py migrate && python3 manage.py initadmin && gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000'
+    # gunicorn login_with_face.wsgi:application -b 0.0.0.0:8000 --capture-output --log-level debug
+    command: bash -c 'python manage.py collectstatic --no-input && python manage.py makemigrations && python manage.py migrate && python3 manage.py initadmin && python manage.py runserver 0.0.0.0:8000'
     environment:
-      - DEBUG=0      
+      - DEBUG=0     
+      - PYTHONUNBUFFERED=1
+ 
     env_file: .env
     volumes:
       - static_media:/django/staticfiles

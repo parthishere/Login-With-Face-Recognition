@@ -140,6 +140,8 @@ class LectrueModel(models.Model):
         ('4', '4th Semester'),
         ('5', '5th Semester'),
         ('6', '6th Semester'),
+        ('7', '7th Semester'),
+        ('8', '8th Semester'),
     )
     
     lecture_name = models.CharField(max_length=100)
@@ -201,7 +203,7 @@ class SessionAttendanceModel(models.Model):
     lecture = models.ForeignKey(LectrueModel, on_delete=models.CASCADE, null=True, blank=True, related_name='change_website_objects_lecture')
     atendees = models.ManyToManyField("login_details.LoginDetails", related_name='sessions', blank=True)
     closed = models.BooleanField(default=False)
-    requested_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='requested_sessions', blank=True)
+    requested_users = models.ManyToManyField("login_details.LoginDetails", related_name='requested_sessions', blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     
     
@@ -244,28 +246,18 @@ def user_post_save_receiver(sender, instance, *args, **kwargs):
     print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     obj = None
     try:
-        obj = UserProfile.objects.get(user=instance)
-    except:
-        pass
-        
-    
-    try:
-        if obj is None:
-            obj = UserProfile.objects.create(user=instance)
-        else: 
-            return
+        UserProfile.objects.get(user=instance)
+    except UserProfile.DoesNotExist:
+        UserProfile.objects.create(user=instance)
     except Exception as e:
         print(e)
-        
-        
-    try:    
-        if obj.unique_id is None:
+    else:
+        obj = UserProfile.objects.get(user=instance)
+        if not obj.unique_id:
             obj.unique_id = unique_id_generator(obj)
             obj.save()
-    except:
-        pass
 
-pre_save.connect(user_post_save_receiver, sender=settings.AUTH_USER_MODEL)
+post_save.connect(user_post_save_receiver, sender=settings.AUTH_USER_MODEL)
 
 
 import datetime
@@ -281,7 +273,6 @@ def lecture_pre_save_reciver(sender, instance, *args, **kwargs):
         name = get_session_name(teacher=instance.teacher, lecture=instance)
         instance.name = name
         
-        
 pre_save.connect(lecture_pre_save_reciver, sender=LectrueModel)
 
 
@@ -291,17 +282,9 @@ def session_pre_save_reciver(sender, instance, *args, **kwargs):
     if instance.pk is None:
         name = get_session_name(teacher=instance.teacher, lecture=instance.lecture)
         instance.name = name
-        
-        
+           
 pre_save.connect(session_pre_save_reciver, sender=SessionAttendanceModel)
 
-# def user_post_save_receiver_for_teacher(sender, instance, *args, **kwargs):
-#     if instance.is_staff and instance.is_teacher is False:
-#         instance.is_teacher = True
-#         instance.save()
-
-
-# post_save.connect(user_post_save_receiver_for_teacher, sender=settings.AUTH_USER_MODEL)
 
 
 
