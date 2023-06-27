@@ -340,9 +340,9 @@ import asyncio
 
 from asgiref.sync import async_to_sync, sync_to_async
 
-# @sync_to_async
-# @login_required(login_url='recognizer:login')
-# @async_to_sync
+@sync_to_async
+@login_required(login_url='recognizer:login')
+@async_to_sync
 async def home_view(request):
     print("in home")
     try:
@@ -360,12 +360,7 @@ async def home_view(request):
     }
 
     all_in_one_user = request.user
-
-    # print(user_user_profile_ip_lectures)
-    # print(user_profile)
-    # print(user_user_profile_ip_lectures.user_profile.lectures.all())
-    # print(user_user_profile_ip_lectures.user_profile.ip_address.all())
-
+    
     if all_in_one_user.is_teacher:
         lectures = all_in_one_user.user_profile.lectures.all()
         context['lectures_list'] = lectures
