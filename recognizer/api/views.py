@@ -37,7 +37,7 @@ class IsTeacherOnly():
             return True
         else:
             try:
-                return request.user.user_profile.is_teacher
+                return request.user.is_teacher
             except:
                 return False
 
@@ -143,9 +143,10 @@ def enable_disable_session_api_view(request):
         print(len(connection.queries))
         return Response({"message": "Something went wrong"})
 
-    
+import ipaddress    
+
 @api_view(['POST'])
-def main_form_submit_API_view(request):
+async def main_form_submit_API_view(request):
     """
         Main form API view\n
         parameters: "image_file", "teacher", "lecture", "ip1"\n
@@ -168,43 +169,49 @@ def main_form_submit_API_view(request):
     file = request.FILES.get('image_file').read()  # src is the name of input attribute in your html file, this src value is set in javascript code
     teacher = request.POST.get('teacher')
     lecture = request.POST.get('lecture')
-    user_ip = request.POST.get('ip1')
+    user_ip = request.POST.get('ip')
+    teacher_current_ip = request.POST.get('ip1_teacher')
 
     
-    teacher_from_form = UserProfile.objects.select_related("user").prefetch_related("change_website_objects").get(id=teacher)
+    teacher_user = UserProfile.objects.select_related("user").prefetch_related("change_website_objects").get(id=teacher)
 
-    if teacher_from_form.is_teacher:
-        teacher_user = teacher_from_form
-    else:
-        return Response({"message": "teacher not found"})
-    
-    
+    if not teacher_user.user.is_teacher:
+            return Response({"message": "teacher not found"})
+
+    if user_profile.user.pk == teacher_user.user.pk:
+        teacher_user.ip_address1 = teacher_current_ip
+        teacher_user.save()
+
     allowed_ips = []
+    allow_attendance = False
 
     if teacher_user.ip_address1:
-        allowed_ip_host = ".".join(teacher_user.ip_address1.split('.')[0:3])
-        allowed_masks = (".{}".format(i) for i in range(256))
-        for mask in allowed_masks:
-            allowed_ips.append(str(allowed_ip_host)+str(mask))
-        
-    if teacher_user.ip_address2:   
-        allowed_ip_host = ".".join(teacher_user.ip_address2.split('.')[0:3])
-        allowed_masks = (".{}".format(i) for i in range(256)) 
-        for mask in allowed_masks:
-            allowed_ips.append(str(allowed_ip_host)+str(mask))
+            allowed_subnet = ipaddress.IPv4Network(teacher_user.ip_address1, strict=False)
+            allowed_ips.extend(str(ip) for ip in allowed_subnet.hosts())
 
-    
-    lecture_object = get_object_or_404(LectrueModel, id=lecture)
-    
+    if teacher_user.ip_address2:
+        allowed_subnet = ipaddress.IPv4Network(teacher_user.ip_address2, strict=False)
+        allowed_ips.extend(str(ip) for ip in allowed_subnet.hosts())
+
+        lecture_object = get_object_or_404(LectrueModel, id=lecture)
+
+
     try:
         allow_attendance = lecture_object.allow_recognize
 
-        last_session = teacher_from_form.change_website_objects.first()
+        last_session = teacher_user.change_website_objects.first()
         print(last_session.name)
     except:
         pass
         
     
+    if not user_ip in allowed_ips:
+        if (teacher_user.ip_address1 is None and teacher_user.ip_address1 is None):
+            pass
+        else:
+            messages.error(request, "Your IP is not in same subnet IPs")
+            return JsonResponse(status=302, data={'success': url})
+
     if not user_ip in allowed_ips:
         if (teacher_user.ip1 is None and teacher_user.ip2 is None):
             pass
@@ -214,45 +221,63 @@ def main_form_submit_API_view(request):
     if allow_attendance:
 
         try:
-            
-            gender = user.gender
+
+            gender = user_profile.gender
             details = {
-            'gender':gender,
-            'college':user_profile.college.college_name,
-            'branch':user_profile.branch.branch_name,
-            'username':user.username,
-            'unique_id':user_profile.unique_id,
-            'user':user_profile,
-            'superuser':user.is_superuser,
+                'gender': gender,
+                'college': user.user_profile.college.college_name,
+                'branch': user.user_profile.branch.branch_name,
+                'username': user.username,
+                'unique_id': user_profile.unique_id,
+                'user': user_profile,
+                'superuser': user.is_superuser,
             }
 
         except Exception as e:
+            print(e)
             details = None
-        
-        frame, login_proceed = get_face_detect_data(file, details)
+            
+        frame, login_proceed = await get_face_detect_data(file, details)
+        print(login_proceed)
         _, buf = cv2.imencode('.jpg', frame)
         image = ContentFile(buf.tobytes())
+    
+
+        
         if login_proceed:
             user_profile.login_proceed = login_proceed
-            
-            instance = LoginDetails.objects.create(user=user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user_profile.enrollment_number)
+
+            instance = LoginDetails.objects.create(
+                user=user, lecture=lecture_object, teacher=teacher_user, enrollment_number=user_profile.enrollment_number)
             instance.processed_img.save("output.jpg", image)
-            
-            if instance in lecture_object.accepted_user.all():
-                if teacher_user.accept_with_request:
-                    last_session.requested_users.add(instance)
-                else:
-                    last_session.atendees.add(instance)
+
+            if user_profile in lecture_object.accepted_user.all():
+                last_session.atendees.add(instance)
+                last_session.save()
+                
+            else:
+                last_session.requested_users.add(instance)
                 last_session.save()
                 user_profile.save()
-            else:
-                return Response({"message": f"you are not accepted in lecture"})
+                messages.error(request, f"you are not accepted in lecture but your attendace has taken as {user.username} - {user_profile.enrollment_number}")
+                return JsonResponse(status=302, data={'success': url})
             
-            return Response({"message": f"Face was recognized as {user.username} - {user_profile.enrollment_number}"})
+            user_profile.save()
+            messages.success(
+                request, f'Your face was recognized as {user.username} - {user_profile.enrollment_number}')
+
+            return JsonResponse(status=302, data={'success': url})
         else:
-            return Response({"message": "Face was not recognized"})
+
+            messages.error(request, 'Face not recognized !')
+            url = reverse('recognizer:home')
+            return JsonResponse(status=302, data={'success': url})
     else:
-        return Response({"message": f"Session hasn't started by {teacher_user.user.username}, Can't take attendance"})
+        messages.error(
+            request, f"Session hasn't started by {teacher_user.user.username}, Can't take attendance")
+        url = reverse('recognizer:home')
+
+        return JsonResponse(status=302, data={'success': url})
     
     
 class LecturesListAPI(ListCreateAPIView):
